@@ -20,6 +20,7 @@ public static class GameConstants
         public const string Level01 = "Level_01";
         public const string Level02 = "Level_02";
         public const string Level03 = "Level_03";
+        public const string Level04 = "Level_04";
 
         /// <summary>当前开发用示例场景，与 SampleScene.unity 对应。</summary>
         public const string SampleScene = "SampleScene";
