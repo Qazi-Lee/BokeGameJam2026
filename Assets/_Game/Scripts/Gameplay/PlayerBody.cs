@@ -1,14 +1,20 @@
 using UnityEngine;
+using DG.Tweening;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerBody : MonoBehaviour
 {
     [SerializeField] private Rigidbody2D body;
+    [SerializeField] private Transform viewRoot;
+    [SerializeField] private float fixedPunchScale = 0.18f;
+    [SerializeField] private float fixedPunchDuration = 0.2f;
 
     private bool isFixed;
     private bool initialized;
     private RigidbodyConstraints2D cachedConstraints;
     private RigidbodyType2D cachedBodyType;
+    private Vector3 cachedViewScale = Vector3.one;
+    private Tween fixedScaleTween;
 
     public bool IsFixed => isFixed;
     public Vector2 Position => body != null ? body.position : (Vector2)transform.position;
@@ -24,6 +30,11 @@ public class PlayerBody : MonoBehaviour
         if (body == null)
         {
             body = GetComponent<Rigidbody2D>();
+        }
+
+        if (viewRoot == null)
+        {
+            viewRoot = transform;
         }
     }
 
@@ -97,9 +108,11 @@ public class PlayerBody : MonoBehaviour
             body.constraints = RigidbodyConstraints2D.FreezeAll;
             body.bodyType = RigidbodyType2D.Static;
             body.Sleep();
+            PlayFixedBounceAnimation();
             return;
         }
 
+        StopFixedBounceAnimation();
         body.bodyType = cachedBodyType;
         body.constraints = cachedConstraints;
         body.WakeUp();
@@ -123,6 +136,49 @@ public class PlayerBody : MonoBehaviour
             cachedBodyType = body.bodyType;
         }
 
+        if (viewRoot == null)
+        {
+            viewRoot = transform;
+        }
+
+        if (viewRoot != null)
+        {
+            cachedViewScale = viewRoot.localScale;
+        }
+
         initialized = true;
+    }
+
+    private void PlayFixedBounceAnimation()
+    {
+        if (viewRoot == null)
+        {
+            return;
+        }
+
+        StopFixedBounceAnimation();
+        viewRoot.localScale = cachedViewScale;
+        fixedScaleTween = viewRoot
+            .DOPunchScale(Vector3.one * fixedPunchScale, fixedPunchDuration, 6, 0.85f)
+            .SetUpdate(true)
+            .OnComplete(() =>
+            {
+                viewRoot.localScale = cachedViewScale;
+                fixedScaleTween = null;
+            });
+    }
+
+    private void StopFixedBounceAnimation()
+    {
+        if (fixedScaleTween != null)
+        {
+            fixedScaleTween.Kill();
+            fixedScaleTween = null;
+        }
+
+        if (viewRoot != null)
+        {
+            viewRoot.localScale = cachedViewScale;
+        }
     }
 }

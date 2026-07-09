@@ -3,7 +3,6 @@ using UnityEngine;
 [RequireComponent(typeof(Collider2D))]
 public class DeathZone : MonoBehaviour
 {
-    [SerializeField] private PlayerController playerController;
 
     private void Awake()
     {
@@ -11,11 +10,6 @@ public class DeathZone : MonoBehaviour
         if (collider != null)
         {
             collider.isTrigger = true;
-        }
-
-        if (playerController == null)
-        {
-            playerController = FindObjectOfType<PlayerController>();
         }
     }
 
@@ -31,12 +25,7 @@ public class DeathZone : MonoBehaviour
         {
             return;
         }
-
-        if (playerController == null || !playerController.IsControlling(body))
-        {
-            return;
-        }
-
+        
         if (GameStateManager.Instance == null)
         {
             Debug.LogWarning("[DeathZone] GameStateManager not found in scene.");
