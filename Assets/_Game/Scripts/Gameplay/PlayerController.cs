@@ -245,7 +245,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        playerToAttach.SnapToPosition(attachPoint.Position);
+        playerToAttach.AttachToPoint(attachPoint.transform);
         playerToAttach.SetFixed(true);
 
         PlayerBody otherPlayer = GetOtherPlayer(playerToAttach);

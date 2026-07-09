@@ -15,6 +15,7 @@ public class PlayerBody : MonoBehaviour
     private RigidbodyType2D cachedBodyType;
     private Vector3 cachedViewScale = Vector3.one;
     private Tween fixedScaleTween;
+    private Transform attachedPoint;
 
     public bool IsFixed => isFixed;
     public Vector2 Position => body != null ? body.position : (Vector2)transform.position;
@@ -23,6 +24,11 @@ public class PlayerBody : MonoBehaviour
     private void Awake()
     {
         EnsureInitialized();
+    }
+
+    private void LateUpdate()
+    {
+        FollowAttachedPoint();
     }
 
     private void OnValidate()
@@ -72,10 +78,30 @@ public class PlayerBody : MonoBehaviour
             return;
         }
 
-        body.velocity = Vector2.zero;
-        body.angularVelocity = 0f;
+        if (body.bodyType != RigidbodyType2D.Static)
+        {
+            body.velocity = Vector2.zero;
+            body.angularVelocity = 0f;
+        }
+
         body.position = position;
         transform.position = position;
+    }
+
+    public void AttachToPoint(Transform point)
+    {
+        EnsureInitialized();
+
+        attachedPoint = point;
+        if (attachedPoint != null)
+        {
+            SnapToPosition(attachedPoint.position);
+        }
+    }
+
+    public void DetachFromPoint()
+    {
+        attachedPoint = null;
     }
 
     public void SetVelocity(Vector2 velocity)
@@ -113,6 +139,7 @@ public class PlayerBody : MonoBehaviour
         }
 
         StopFixedBounceAnimation();
+        DetachFromPoint();
         body.bodyType = cachedBodyType;
         body.constraints = cachedConstraints;
         body.WakeUp();
@@ -180,5 +207,15 @@ public class PlayerBody : MonoBehaviour
         {
             viewRoot.localScale = cachedViewScale;
         }
+    }
+
+    private void FollowAttachedPoint()
+    {
+        if (!isFixed || attachedPoint == null)
+        {
+            return;
+        }
+
+        SnapToPosition(attachedPoint.position);
     }
 }

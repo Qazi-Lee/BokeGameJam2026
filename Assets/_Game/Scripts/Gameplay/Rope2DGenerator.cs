@@ -45,7 +45,7 @@ public class Rope2DGenerator : MonoBehaviour
         ClearRope();
         EnsureLineRenderer();
 
-        float linkLength = ropeLength / (segmentCount + 1f);
+        float segmentLength = ropeLength / segmentCount;
         Vector3 startPosition = startBody.position;
         Vector3 endPosition = endBody.position;
 
@@ -65,32 +65,26 @@ public class Rope2DGenerator : MonoBehaviour
             segmentBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
 
             BoxCollider2D collider = segment.AddComponent<BoxCollider2D>();
-            collider.size = new Vector2(linkLength, ropeWidth);
+            collider.size = new Vector2(segmentLength, ropeWidth);
             collider.enabled = enableSegmentCollision;
 
-            DistanceJoint2D distanceJoint = segment.AddComponent<DistanceJoint2D>();
-            distanceJoint.autoConfigureConnectedAnchor = false;
-            distanceJoint.autoConfigureDistance = false;
-            distanceJoint.connectedBody = previousBody;
-            distanceJoint.anchor = Vector2.zero;
-            distanceJoint.connectedAnchor = Vector2.zero;
-            distanceJoint.distance = linkLength;
-            distanceJoint.maxDistanceOnly = false;
-            distanceJoint.enableCollision = enableSegmentCollision;
+            HingeJoint2D hingeJoint = segment.AddComponent<HingeJoint2D>();
+            hingeJoint.autoConfigureConnectedAnchor = false;
+            hingeJoint.connectedBody = previousBody;
+            hingeJoint.anchor = new Vector2(-segmentLength * 0.5f, 0f);
+            hingeJoint.connectedAnchor = previousBody == startBody ? Vector2.zero : new Vector2(segmentLength * 0.5f, 0f);
+            hingeJoint.enableCollision = enableSegmentCollision;
 
             previousBody = segmentBody;
             segments.Add(segment.transform);
         }
 
-        DistanceJoint2D endDistanceJoint = endBody.gameObject.AddComponent<DistanceJoint2D>();
-        endDistanceJoint.autoConfigureConnectedAnchor = false;
-        endDistanceJoint.autoConfigureDistance = false;
-        endDistanceJoint.connectedBody = previousBody;
-        endDistanceJoint.anchor = Vector2.zero;
-        endDistanceJoint.connectedAnchor = Vector2.zero;
-        endDistanceJoint.distance = linkLength;
-        endDistanceJoint.maxDistanceOnly = false;
-        endDistanceJoint.enableCollision = enableSegmentCollision;
+        HingeJoint2D endHingeJoint = endBody.gameObject.AddComponent<HingeJoint2D>();
+        endHingeJoint.autoConfigureConnectedAnchor = false;
+        endHingeJoint.connectedBody = previousBody;
+        endHingeJoint.anchor = Vector2.zero;
+        endHingeJoint.connectedAnchor = new Vector2(segmentLength * 0.5f, 0f);
+        endHingeJoint.enableCollision = enableSegmentCollision;
 
         UpdateVisual();
     }
