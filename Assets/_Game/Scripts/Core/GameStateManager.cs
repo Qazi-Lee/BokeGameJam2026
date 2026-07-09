@@ -27,6 +27,11 @@ public class GameStateManager : BaseMonoManager<GameStateManager>
             AudioManager.Instance.PlayOneShot(GameConstants.AudioNames.GameOver);
         }
 
+        if (GameOverUI.Instance != null)
+        {
+            GameOverUI.Instance.Show();
+        }
+
         Debug.Log("[GameStateManager] Game Over");
     }
 
@@ -34,5 +39,10 @@ public class GameStateManager : BaseMonoManager<GameStateManager>
     {
         CurrentState = GameState.Playing;
         Time.timeScale = 1f;
+
+        if (GameOverUI.Instance != null)
+        {
+            GameOverUI.Instance.Hide();
+        }
     }
 }
