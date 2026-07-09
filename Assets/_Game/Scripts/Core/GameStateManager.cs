@@ -61,6 +61,27 @@ public class GameStateManager : BaseMonoManager<GameStateManager>
         Debug.Log("[GameStateManager] Enter Transitioning");
     }
 
+    /// <summary>
+    /// 场景切换开始前调用。可从 Playing 或 GameOver 进入转场（如重试、过关）。
+    /// </summary>
+    public void PrepareForSceneLoad()
+    {
+        if (CurrentState == GameState.Transitioning)
+        {
+            return;
+        }
+
+        if (CurrentState == GameState.GameOver && GameOverUI.Instance != null)
+        {
+            GameOverUI.Instance.Hide();
+        }
+
+        CurrentState = GameState.Transitioning;
+        Time.timeScale = 0f;
+
+        Debug.Log("[GameStateManager] Prepare for scene load");
+    }
+
     /// <summary>重置为正常游玩状态（场景加载完成或重试后调用）。</summary>
     public void ResetToPlaying()
     {
