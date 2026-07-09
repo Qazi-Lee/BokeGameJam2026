@@ -4,6 +4,7 @@ public static class GameConstants
     {
         public const string Player = "Player";
         public const string Death = "Death";
+        public const string AttachPoint = "AttachPoint";
     }
 
     public static class AudioNames

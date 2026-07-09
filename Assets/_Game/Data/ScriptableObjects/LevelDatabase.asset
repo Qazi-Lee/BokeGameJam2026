@@ -18,11 +18,11 @@ MonoBehaviour:
     displayName: Level 1
     backgroundSprite: {fileID: 0}
     characterSprite: {fileID: 0}
-  - sceneName: Level_01
+  - sceneName: Level1
     displayName: Level 2
     backgroundSprite: {fileID: 0}
     characterSprite: {fileID: 0}
-  - sceneName: Level_02
+  - sceneName: Level3
     displayName: Level 3
     backgroundSprite: {fileID: 0}
     characterSprite: {fileID: 0}
