@@ -27,6 +27,11 @@ public class LevelAchievementView : MonoBehaviour
     [Header("亮星物体（可选，留空则自动绑定 StarDark 下亮星星子节点）")]
     [SerializeField] private GameObject[] starBrightObjects = new GameObject[LevelCount * StarsPerLevel];
 
+    [Header("关卡插画（images 下 Image_1~4，留空则自动绑定）")]
+    [SerializeField] private Image[] levelImages = new Image[LevelCount];
+
+    [SerializeField] private Color lockedLevelImageColor = new Color(0.45f, 0.45f, 0.45f, 1f);
+
     [Header("显示层级（嵌套 Canvas 时确保盖在主菜单之上）")]
     [SerializeField] private int panelSortingOrder = 100;
 
@@ -45,6 +50,8 @@ public class LevelAchievementView : MonoBehaviour
         {
             EnsurePanelCoversScreen();
             EnsurePanelCanvasOnTop();
+            EnsureNestedCanvasCompatibility();
+            panelRoot.transform.SetAsLastSibling();
             panelRoot.SetActive(true);
         }
     }
@@ -67,7 +74,9 @@ public class LevelAchievementView : MonoBehaviour
         isInitialized = true;
         ResolveReferences();
         EnsureGraphicRaycaster();
+        EnsureNestedCanvasCompatibility();
         EnsureStarBrightBindings();
+        EnsureLevelImageBindings();
         EnsureStarFrameLayerVisible();
         BindLevelItems();
 
@@ -108,9 +117,55 @@ public class LevelAchievementView : MonoBehaviour
             return;
         }
 
-        if (panelRoot.GetComponent<GraphicRaycaster>() == null)
+        Canvas ownCanvas = panelRoot.GetComponent<Canvas>();
+        if (ownCanvas != null)
         {
-            panelRoot.AddComponent<GraphicRaycaster>();
+            if (panelRoot.GetComponent<GraphicRaycaster>() == null)
+            {
+                panelRoot.AddComponent<GraphicRaycaster>();
+            }
+
+            return;
+        }
+
+        Canvas parentCanvas = panelRoot.GetComponentInParent<Canvas>();
+        if (parentCanvas != null && parentCanvas.GetComponent<GraphicRaycaster>() == null)
+        {
+            parentCanvas.gameObject.AddComponent<GraphicRaycaster>();
+        }
+    }
+
+    /// <summary>
+    /// 嵌在主菜单 Canvas 下时，子 Canvas 在 Build 中常导致整页不渲染；改由父 Canvas 统一绘制。
+    /// </summary>
+    private void EnsureNestedCanvasCompatibility()
+    {
+        if (panelRoot == null || panelRoot.transform.parent == null)
+        {
+            return;
+        }
+
+        if (panelRoot.GetComponentInParent<Canvas>() == null)
+        {
+            return;
+        }
+
+        Canvas ownCanvas = panelRoot.GetComponent<Canvas>();
+        if (ownCanvas != null)
+        {
+            Destroy(ownCanvas);
+        }
+
+        CanvasScaler ownScaler = panelRoot.GetComponent<CanvasScaler>();
+        if (ownScaler != null)
+        {
+            Destroy(ownScaler);
+        }
+
+        GraphicRaycaster ownRaycaster = panelRoot.GetComponent<GraphicRaycaster>();
+        if (ownRaycaster != null)
+        {
+            Destroy(ownRaycaster);
         }
     }
 
@@ -167,6 +222,7 @@ public class LevelAchievementView : MonoBehaviour
     public void Refresh(LevelDatabaseSO levelDatabase, SaveManager saveManager)
     {
         RefreshStarDisplay(saveManager);
+        RefreshLevelImageDisplay(saveManager);
 
         if (levelItems == null || levelItems.Length == 0)
         {
@@ -220,6 +276,74 @@ public class LevelAchievementView : MonoBehaviour
                 brightStar.SetActive(star < starCount);
             }
         }
+    }
+
+    private void RefreshLevelImageDisplay(SaveManager saveManager)
+    {
+        EnsureLevelImageBindings();
+
+        if (levelImages == null || levelImages.Length == 0)
+        {
+            return;
+        }
+
+        for (int i = 0; i < levelImages.Length; i++)
+        {
+            Image image = levelImages[i];
+            if (image == null)
+            {
+                continue;
+            }
+
+            bool unlocked = saveManager != null && saveManager.IsLevelUnlocked(i);
+            image.color = unlocked ? Color.white : lockedLevelImageColor;
+        }
+    }
+
+    private void EnsureLevelImageBindings()
+    {
+        if (HasConfiguredLevelImages())
+        {
+            return;
+        }
+
+        Transform imagesRoot = FindChildRecursive(transform, "images");
+        if (imagesRoot == null)
+        {
+            Debug.LogWarning("[LevelAchievementView] 未找到 images 节点。", this);
+            return;
+        }
+
+        levelImages = new Image[LevelCount];
+        for (int i = 0; i < LevelCount; i++)
+        {
+            Transform child = imagesRoot.Find($"Image_{i + 1}");
+            if (child == null)
+            {
+                Debug.LogWarning($"[LevelAchievementView] 未找到 Image_{i + 1}。", this);
+                continue;
+            }
+
+            levelImages[i] = child.GetComponent<Image>();
+        }
+    }
+
+    private bool HasConfiguredLevelImages()
+    {
+        if (levelImages == null || levelImages.Length < LevelCount)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < LevelCount; i++)
+        {
+            if (levelImages[i] == null)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private void EnsureStarBrightBindings()
@@ -387,6 +511,7 @@ public class LevelAchievementView : MonoBehaviour
     {
         ResolveReferences();
         EnsureStarBrightBindings();
+        EnsureLevelImageBindings();
 
         if (panelRoot == null || closeButton == null)
         {

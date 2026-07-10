@@ -16,6 +16,24 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
     private const string DefaultTopBarPrefabPath = "Assets/_Game/Prefabs/UI/PanelsSum/TopBar.prefab";
     private const string DefaultVandDPanelPrefabPath = "Assets/_Game/Prefabs/UI/PanelsSum/VandDPanel.prefab";
 
+    private static readonly string[] DefaultIntroPanelPrefabPaths =
+    {
+        "Assets/_Game/Prefabs/UI/PanelsSum/Panel0.prefab",
+        "Assets/_Game/Prefabs/UI/PanelsSum/Panel1.prefab",
+        "Assets/_Game/Prefabs/UI/PanelsSum/Panel2.prefab",
+        "Assets/_Game/Prefabs/UI/PanelsSum/Panel3.prefab",
+        "Assets/_Game/Prefabs/UI/PanelsSum/Panel4.prefab"
+    };
+
+    private static readonly string[] DefaultIntroPageBackgroundPaths =
+    {
+        null,
+        "Assets/_Game/Art/Sprites/Level1BGD.png",
+        "Assets/_Game/Art/Sprites/Level2BGD.png",
+        "Assets/_Game/Art/Sprites/Level3BGD.png",
+        "Assets/_Game/Art/Sprites/level4BGD.jpg",
+    };
+
     [Header("配置")]
     [SerializeField] private LevelDatabaseSO levelDatabase;
     [SerializeField] private SceneBgmConfigSO sceneBgmConfig;
@@ -30,6 +48,8 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
     [Header("关卡 UI 预制体（Build 需在 Inspector 指定，Editor 可自动补引用）")]
     [SerializeField] private GameObject topBarPrefab;
     [SerializeField] private GameObject vandDPanelPrefab;
+    [SerializeField] private GameObject[] introPanelPrefabs = new GameObject[NarrativeIntroController.PageCount];
+    [SerializeField] private Sprite[] introPageBackgrounds = new Sprite[NarrativeIntroController.PageCount];
 
     private bool isLoading;
     private TopBarController topBar;
@@ -487,6 +507,8 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         {
             narrativeIntro = gameObject.AddComponent<NarrativeIntroController>();
         }
+
+        narrativeIntro.Configure(introPanelPrefabs, introPageBackgrounds);
     }
 
     private void EnsureOutcomePanels()
@@ -547,6 +569,43 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         if (vandDPanelPrefab == null)
         {
             vandDPanelPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(DefaultVandDPanelPrefabPath);
+        }
+
+        EnsureIntroAssetReferences();
+    }
+
+    private void EnsureIntroAssetReferences()
+    {
+        if (introPanelPrefabs == null || introPanelPrefabs.Length < NarrativeIntroController.PageCount)
+        {
+            introPanelPrefabs = new GameObject[NarrativeIntroController.PageCount];
+        }
+
+        for (int i = 0; i < introPanelPrefabs.Length; i++)
+        {
+            if (introPanelPrefabs[i] != null || i >= DefaultIntroPanelPrefabPaths.Length)
+            {
+                continue;
+            }
+
+            introPanelPrefabs[i] = AssetDatabase.LoadAssetAtPath<GameObject>(DefaultIntroPanelPrefabPaths[i]);
+        }
+
+        if (introPageBackgrounds == null || introPageBackgrounds.Length < NarrativeIntroController.PageCount)
+        {
+            introPageBackgrounds = new Sprite[NarrativeIntroController.PageCount];
+        }
+
+        for (int i = NarrativeIntroController.FirstLevelPageIndex; i < introPageBackgrounds.Length; i++)
+        {
+            if (introPageBackgrounds[i] != null ||
+                i >= DefaultIntroPageBackgroundPaths.Length ||
+                string.IsNullOrEmpty(DefaultIntroPageBackgroundPaths[i]))
+            {
+                continue;
+            }
+
+            introPageBackgrounds[i] = AssetDatabase.LoadAssetAtPath<Sprite>(DefaultIntroPageBackgroundPaths[i]);
         }
     }
 

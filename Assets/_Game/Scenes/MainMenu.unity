@@ -549,6 +549,18 @@ MonoBehaviour:
   videoPlayback: {fileID: 0}
   topBarPrefab: {fileID: 916544065925914488, guid: 26fe160434bb36c4ca976fe3558da948, type: 3}
   vandDPanelPrefab: {fileID: 8398417362712518566, guid: 3aae237aba7b3474d8ca6b338aec4dae, type: 3}
+  introPanelPrefabs:
+  - {fileID: 6598948062909523935, guid: 6c4fb44ca59dffc4395ef2000c82ca80, type: 3}
+  - {fileID: 8977977602213305862, guid: e27e20a805fac6b4e976648deacbcbef, type: 3}
+  - {fileID: 5058600688752437710, guid: df5e80b92cb0a8e4a9128dc53417e057, type: 3}
+  - {fileID: 6530008475916614314, guid: 69dbebb3566a0b34bac40aa8d9f760ea, type: 3}
+  - {fileID: 6693818237112301933, guid: 6eee42ebd871cb241baec71d1bc3781f, type: 3}
+  introPageBackgrounds:
+  - {fileID: 0}
+  - {fileID: 21300000, guid: 8170fe3fe36c012478cae6ee6c28dd0c, type: 3}
+  - {fileID: 21300000, guid: 7103e7ab987e3864ca7c468905c421c2, type: 3}
+  - {fileID: 21300000, guid: c43ad7b838cfcbd4c8887f1a1f207bb6, type: 3}
+  - {fileID: 21300000, guid: c95c87e072851c546814f016c6a668ca, type: 3}
 --- !u!4 &1587238563
 Transform:
   m_ObjectHideFlags: 0

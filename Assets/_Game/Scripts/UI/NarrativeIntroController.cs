@@ -57,12 +57,39 @@ public class NarrativeIntroController : MonoBehaviour
 
     public bool IsShowing { get; private set; }
 
+    /// <summary>由 SceneFlowManager 注入预制体与背景，Build 必须走此路径。</summary>
+    public void Configure(GameObject[] prefabs, Sprite[] backgrounds)
+    {
+        if (prefabs != null)
+        {
+            EnsurePanelPrefabArraySize();
+            int copyCount = Mathf.Min(prefabs.Length, panelPrefabs.Length);
+            for (int i = 0; i < copyCount; i++)
+            {
+                if (prefabs[i] != null)
+                {
+                    panelPrefabs[i] = prefabs[i];
+                }
+            }
+        }
+
+        if (backgrounds != null)
+        {
+            EnsurePageBackgroundArraySize();
+            int copyCount = Mathf.Min(backgrounds.Length, pageBackgrounds.Length);
+            for (int i = 0; i < copyCount; i++)
+            {
+                if (backgrounds[i] != null)
+                {
+                    pageBackgrounds[i] = backgrounds[i];
+                }
+            }
+        }
+    }
+
     private void Awake()
     {
-#if UNITY_EDITOR
         EnsurePrefabReferences();
-        EnsurePageBackgrounds();
-#endif
         transitionUI = GetComponent<SceneTransitionUI>();
     }
 
@@ -173,6 +200,26 @@ public class NarrativeIntroController : MonoBehaviour
         return null;
     }
 
+    private void EnsurePrefabReferences()
+    {
+#if UNITY_EDITOR
+        EnsureEditorPrefabReferences();
+        EnsurePageBackgrounds();
+#endif
+
+        for (int i = 0; i < PageCount; i++)
+        {
+            if (panelPrefabs[i] != null)
+            {
+                continue;
+            }
+
+            Debug.LogWarning(
+                $"[NarrativeIntroController] 页面 {i} 未配置介绍预制体，Build 中请在 SceneFlowManager 指定 introPanelPrefabs。",
+                this);
+        }
+    }
+
     private void EnsureBackdropBuilt()
     {
         if (backdropRoot != null)
@@ -251,9 +298,7 @@ public class NarrativeIntroController : MonoBehaviour
     {
         if (!HasPanelPrefab(pageIndex))
         {
-#if UNITY_EDITOR
             EnsurePrefabReferences();
-#endif
         }
 
         if (!HasPanelPrefab(pageIndex))
@@ -276,9 +321,40 @@ public class NarrativeIntroController : MonoBehaviour
         }
 
         ConfigureCanvas(panelObject);
+        NormalizeIntroPanelHierarchy(panelObject);
         panel.Hide();
         panelInstances[pageIndex] = panel;
         return panel;
+    }
+
+    /// <summary>
+    /// mask 上的 World Space Canvas 嵌在 Screen Space Overlay 下，Editor 有时能显示但 Build 会整页不可见。
+    /// </summary>
+    private static void NormalizeIntroPanelHierarchy(GameObject panelObject)
+    {
+        Transform mask = panelObject.transform.Find("mask");
+        if (mask == null)
+        {
+            return;
+        }
+
+        Canvas maskCanvas = mask.GetComponent<Canvas>();
+        if (maskCanvas != null)
+        {
+            Object.Destroy(maskCanvas);
+        }
+
+        GraphicRaycaster maskRaycaster = mask.GetComponent<GraphicRaycaster>();
+        if (maskRaycaster != null)
+        {
+            Object.Destroy(maskRaycaster);
+        }
+
+        Image maskImage = mask.GetComponent<Image>();
+        if (maskImage != null)
+        {
+            maskImage.raycastTarget = false;
+        }
     }
 
     private void ConfigureCanvas(GameObject panelObject)
@@ -292,6 +368,11 @@ public class NarrativeIntroController : MonoBehaviour
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.overrideSorting = true;
         canvas.sortingOrder = canvasSortOrder;
+
+        if (panelObject.GetComponent<GraphicRaycaster>() == null)
+        {
+            panelObject.AddComponent<GraphicRaycaster>();
+        }
     }
 
     private static IEnumerator WaitUnscaled(float seconds)
@@ -323,9 +404,51 @@ public class NarrativeIntroController : MonoBehaviour
                Input.GetTouch(0).phase == TouchPhase.Began;
     }
 
-#if UNITY_EDITOR
-    private void EnsurePrefabReferences()
+    private void EnsurePanelPrefabArraySize()
     {
+        if (panelPrefabs != null && panelPrefabs.Length >= PageCount)
+        {
+            return;
+        }
+
+        GameObject[] resized = new GameObject[PageCount];
+        if (panelPrefabs != null)
+        {
+            int copyCount = Mathf.Min(panelPrefabs.Length, PageCount);
+            for (int i = 0; i < copyCount; i++)
+            {
+                resized[i] = panelPrefabs[i];
+            }
+        }
+
+        panelPrefabs = resized;
+    }
+
+    private void EnsurePageBackgroundArraySize()
+    {
+        if (pageBackgrounds != null && pageBackgrounds.Length >= PageCount)
+        {
+            return;
+        }
+
+        Sprite[] resized = new Sprite[PageCount];
+        if (pageBackgrounds != null)
+        {
+            int copyCount = Mathf.Min(pageBackgrounds.Length, PageCount);
+            for (int i = 0; i < copyCount; i++)
+            {
+                resized[i] = pageBackgrounds[i];
+            }
+        }
+
+        pageBackgrounds = resized;
+    }
+
+#if UNITY_EDITOR
+    private void EnsureEditorPrefabReferences()
+    {
+        EnsurePanelPrefabArraySize();
+
         for (int i = 0; i < PageCount; i++)
         {
             if (panelPrefabs[i] != null)
@@ -362,26 +485,6 @@ public class NarrativeIntroController : MonoBehaviour
 
             pageBackgrounds[i] = AssetDatabase.LoadAssetAtPath<Sprite>(DefaultPageBackgroundPaths[i]);
         }
-    }
-
-    private void EnsurePageBackgroundArraySize()
-    {
-        if (pageBackgrounds != null && pageBackgrounds.Length >= PageCount)
-        {
-            return;
-        }
-
-        Sprite[] resized = new Sprite[PageCount];
-        if (pageBackgrounds != null)
-        {
-            int copyCount = Mathf.Min(pageBackgrounds.Length, PageCount);
-            for (int i = 0; i < copyCount; i++)
-            {
-                resized[i] = pageBackgrounds[i];
-            }
-        }
-
-        pageBackgrounds = resized;
     }
 #endif
 }
