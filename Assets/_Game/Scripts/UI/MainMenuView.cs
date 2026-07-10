@@ -13,8 +13,7 @@ public class MainMenuView : MonoBehaviour
     [SerializeField] private Button newGameButton;
     [SerializeField] private Button levelAchievementButton;
     [SerializeField] private Button creditsButton;
-    [SerializeField] private Button rulesButton;
-    [SerializeField] private Button settingsButton;
+    [SerializeField] private Button exitGameButton;
 
     [Header("可选：继续按钮禁用遮罩（不绑则仅改 interactable）")]
     [SerializeField] private Graphic continueDisabledOverlay;
@@ -35,8 +34,7 @@ public class MainMenuView : MonoBehaviour
         BindButton(newGameButton, controller.OnNewGameClicked);
         BindButton(levelAchievementButton, controller.OnLevelAchievementClicked);
         BindButton(creditsButton, controller.OnCreditsClicked);
-        BindButton(rulesButton, controller.OnRulesClicked);
-        BindButton(settingsButton, controller.OnSettingsClicked);
+        BindButton(exitGameButton, controller.OnExitGameClicked);
     }
 
     /// <summary>设置「继续游戏」是否可点击。</summary>
@@ -69,8 +67,7 @@ public class MainMenuView : MonoBehaviour
                      && newGameButton != null
                      && levelAchievementButton != null
                      && creditsButton != null
-                     && rulesButton != null
-                     && settingsButton != null;
+                     && exitGameButton != null;
 
         if (!valid && logError)
         {

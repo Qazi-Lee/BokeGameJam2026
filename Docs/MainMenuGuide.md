@@ -21,7 +21,7 @@
 
 - **代码**：已完成（Controller、View、覆盖弹窗、角色轮播）
 - **场景骨架**：`MainMenu.unity` 已有系统节点与 Canvas 占位
-- **待美术/Editor**：6 个菜单 Button、弹窗 UI 与 Inspector 引用尚未配齐（见 [第九节](#九待美术editor-完成项)）
+- **待美术/Editor**：5 个菜单 Button、弹窗 UI 与 Inspector 引用尚未配齐（见 [第九节](#九待美术editor-完成项)）
 
 ---
 
@@ -75,7 +75,7 @@ flowchart TB
 | 文件 | 职责 |
 |------|------|
 | [`MainMenuController.cs`](../Assets/_Game/Scripts/UI/MainMenuController.cs) | 菜单按钮回调、继续按钮刷新、`RequestEnterLevel`、Manager 初始化、弹窗确认后跳转 |
-| [`MainMenuView.cs`](../Assets/_Game/Scripts/UI/MainMenuView.cs) | 6 个 Button 绑定、`SetContinueEnabled`、轮播初始化、引用校验 |
+| [`MainMenuView.cs`](../Assets/_Game/Scripts/UI/MainMenuView.cs) | 5 个 Button 绑定、`SetContinueEnabled`、轮播初始化、引用校验 |
 | [`OverwriteSaveDialogView.cs`](../Assets/_Game/Scripts/UI/OverwriteSaveDialogView.cs) | 覆盖存档弹窗显隐、动态/固定文案、确认/取消 |
 | [`CharacterCarousel.cs`](../Assets/_Game/Scripts/UI/CharacterCarousel.cs) | 每 2 秒轮播角色图；`manualSprites` 优先，否则读 `LevelDatabase.characterSprite` |
 
@@ -89,16 +89,15 @@ flowchart TB
 
 ---
 
-## 四、六个菜单按钮行为
+## 四、五个菜单按钮行为
 
 | 按钮 | 方法 | 行为 |
 |------|------|------|
 | 继续游戏 | `OnContinueClicked` | `CanContinue` 为 false 时不响应；否则 `TryGetContinueLevel` → 加载当前进度关卡（场景初始位置） |
 | 新游戏 | `OnNewGameClicked` | 有存档 → 弹覆盖确认；无存档 → `BeginNewGame()` + 加载第 1 关 |
-| 关卡成就 | `OnLevelAchievementClicked` | Phase 4 接线；当前触发 `OnLevelAchievementRequested` 事件或 `Debug.Log` |
-| 致谢名单 | `OnCreditsClicked` | Phase 4 接线；当前触发 `OnCreditsRequested` 事件或 `Debug.Log` |
-| 规则 | `OnRulesClicked` | Phase 4 接线；当前触发 `OnRulesRequested` 事件或 `Debug.Log` |
-| 设置 | `OnSettingsClicked` | Phase 4 接线；当前触发 `OnSettingsRequested` 事件或 `Debug.Log` |
+| 关卡成就 | `OnLevelAchievementClicked` | 打开 `LevelAchievementView` |
+| 致谢名单 | `OnCreditsClicked` | 打开 `CreditsView` |
+| 退出游戏 | `OnExitGameClicked` | 打开 `ExitGameDialogView` 确认；未配置弹窗时直接退出 |
 
 **继续按钮灰态：**
 
@@ -169,7 +168,7 @@ MainMenu.unity
 └── MainMenuCanvas           ← Canvas + MainMenuView
     ├── Background           (Image)
     ├── TitleArea            (Text × 2，可选)
-    ├── MenuArea             (Button × 6)
+    ├── MenuArea             (Button × 5)
     ├── ShowcaseArea         (Image + CharacterCarousel)
     └── Panels/
         └── OverwriteSaveDialog   ← OverwriteSaveDialogView
@@ -184,11 +183,11 @@ MainMenu.unity
 
 1. 打开 `Assets/_Game/Scenes/MainMenu.unity`
 2. 确认 `MainMenuSystems` 上已挂 `MainMenuController`，并拖入 `LevelDatabase`
-3. 在 `MainMenuCanvas` 下摆背景、标题、6 个 Button、展示区
+3. 在 `MainMenuCanvas` 下摆背景、标题、5 个 Button、展示区
 4. 在展示区子节点挂 `CharacterCarousel`，拖入 `displayImage`（及可选 `manualSprites`）
 5. 在 `Panels/OverwriteSaveDialog` 搭弹窗 UI，挂 `OverwriteSaveDialogView`，拖齐引用
 6. 在 `MainMenuController` 上拖入 `MainMenuView`、`OverwriteSaveDialogView`
-7. 在 `MainMenuView` 上拖入 6 个 Button、可选遮罩、`CharacterCarousel`
+7. 在 `MainMenuView` 上拖入 5 个 Button、可选遮罩、`CharacterCarousel`
 8. 右键各 View 组件 → **Validate References**，确认 Console 无报错
 
 ### Inspector 拖引用清单
@@ -196,7 +195,7 @@ MainMenu.unity
 | 组件 | 需要拖入 |
 |------|----------|
 | `MainMenuController` | `MainMenuView`、`OverwriteSaveDialogView`、`LevelDatabase` |
-| `MainMenuView` | 6 个菜单 Button、可选 `continueDisabledOverlay`、`CharacterCarousel` |
+| `MainMenuView` | 5 个菜单 Button、可选 `continueDisabledOverlay`、`CharacterCarousel` |
 | `OverwriteSaveDialogView` | `panelRoot`、动态/固定文案 Text、确认/取消 Button |
 | `CharacterCarousel` | `displayImage`、可选 `manualSprites` 或 `LevelDatabase` |
 
@@ -251,7 +250,7 @@ Build Settings 已注册：`MainMenu`（Index 0）+ `level1`–`level4`。打包
 
 | 项 | 状态 |
 |----|------|
-| `MainMenuView` 的 6 个 Button | 均为空（`{fileID: 0}`） |
+| `MainMenuView` 的 5 个 Button | 均为空（`{fileID: 0}`） |
 | `MainMenuView` 的 `CharacterCarousel` | 为空 |
 | `OverwriteSaveDialog` 脚本 | 需重新挂载 `OverwriteSaveDialogView`（场景中 `m_Script` 曾丢失） |
 | 弹窗 `dynamicLineText`、`confirmButton`、`cancelButton` | 未拖入 |
@@ -261,25 +260,73 @@ Build Settings 已注册：`MainMenu`（Index 0）+ `level1`–`level4`。打包
 
 ---
 
-## 十、与 Phase 4 的衔接
+## 十、Phase 4 弹窗与面板（代码已完成）
 
-Phase 4 将在 Phase 3 基础上新增以下 View（同样 **无接口层**）：
+Phase 4 延续 Controller + View 模式，**不生成 UI**。美术在 Canvas 下搭建面板并拖引用即可。
 
-| 计划文件 | 功能 |
-|----------|------|
-| `RulesDialogView` | 规则滚动 + 关闭 |
-| `SettingsDialogView`（大厅版） | 关闭 + 退出游戏 |
-| `LevelAchievementView` | 4 关列表、锁态、选关调用 `RequestEnterLevel` |
-| `CreditsView` | 致谢滚动占位 |
+### 场景结构建议
 
-**注意：** 覆盖存档弹窗已在 Phase 3 实现（`OverwriteSaveDialogView`），Phase 4 **不再新建**。
+```
+MainMenuCanvas
+└── Panels/
+    ├── OverwriteSaveDialog      ← Phase 3
+    ├── ExitGameDialog         ← ExitGameDialogView
+    ├── LevelAchievementPanel    ← LevelAchievementView
+    │   ├── LevelItem_0          ← LevelAchievementItemView
+    │   ├── LevelItem_1
+    │   ├── LevelItem_2
+    │   └── LevelItem_3
+    └── CreditsPanel             ← CreditsView
+```
 
-`MainMenuController` 已预留事件，Phase 4 可订阅或扩展 Controller 打开对应面板：
+### 脚本职责
 
-- `OnLevelAchievementRequested`
-- `OnCreditsRequested`
-- `OnRulesRequested`
-- `OnSettingsRequested`
+| 文件 | 功能 |
+|------|------|
+| `ExitGameDialogView` | 退出确认文案 + 确认/取消；确认后退出应用 |
+| `LevelAchievementView` | 刷新 4 关解锁状态，选关通知 Controller |
+| `LevelAchievementItemView` | 单行：标题、锁态遮罩、进入按钮；`starsRoot` 默认隐藏 |
+| `CreditsView` | 致谢文案 + 可选 ScrollRect 自动滚动 + 关闭 |
+
+### MainMenuController 接线
+
+| 菜单按钮 | 打开面板 |
+|----------|----------|
+| 退出游戏 | `exitGameDialogView.Show()` |
+| 关卡成就 | `levelAchievementView.Show(levelDatabase, SaveManager)` |
+| 致谢名单 | `creditsView.Show()` |
+
+选关流程：`LevelAchievementItemView` → `LevelAchievementView.OnLevelEnterRequested` → `MainMenuController.RequestEnterLevel` → 有档时 `OverwriteSaveDialogView`。
+
+打开任一面板前会调用 `CloseAllPanels()`，避免多面板叠显。
+
+### Inspector 拖引用清单
+
+| 组件 | 需要拖入 |
+|------|----------|
+| `MainMenuController` | 上述 3 个面板 View + `ExitGameDialogView`（可不拖，运行时 `FindObjectOfType` 兜底） |
+| `ExitGameDialogView` | `panelRoot`、可选 `messageText`、确认/取消 Button |
+| `LevelAchievementView` | `panelRoot`、`closeButton`、4 个 `LevelAchievementItemView` |
+| `LevelAchievementItemView` | `titleText`、`lockedOverlay`、`enterButton`；可选 `starsRoot` |
+| `CreditsView` | `panelRoot`、`creditsText`、可选 `scrollRect`、`closeButton` |
+
+各 View 均支持 **右键 → Validate References** 校验。
+
+### Phase 4 测试
+
+| 步骤 | 操作 | 预期 |
+|------|------|------|
+| 退出 | 点「退出游戏」 | 打开确认弹窗；确认后退出（Editor 下停止 Play） |
+| 致谢 | 点「致谢名单」 | 打开致谢；ScrollRect 配置后自动上滚 |
+| 成就-锁 | 无存档通关记录 | 仅第 1 关可进，其余显示锁态 |
+| 成就-解锁 | `SaveManagerTest` 按 `3` 模拟通关 | 下一关解锁、可点击进入 |
+| 成就-覆盖 | 有存档时选关 | 弹出覆盖确认；确认后进入对应关 |
+
+### 扩展 Phase / Phase 5 预留
+
+- `LevelAchievementView.showStars`：设为 `true` 并配置星图后显示三星
+- `LevelAchievementView.resetProgressButton`：当前强制隐藏/禁用，扩展 Phase 启用
+- `SettingsDialogView`：仅用于 Phase 5 游戏内设置（回到主页面、手动存档等）
 
 ---
 
@@ -299,6 +346,11 @@ Assets/_Game/
         ├── MainMenuController.cs
         ├── MainMenuView.cs
         ├── OverwriteSaveDialogView.cs
+        ├── ExitGameDialogView.cs
+        ├── SettingsDialogView.cs
+        ├── LevelAchievementView.cs
+        ├── LevelAchievementItemView.cs
+        ├── CreditsView.cs
         └── CharacterCarousel.cs
 ```
 

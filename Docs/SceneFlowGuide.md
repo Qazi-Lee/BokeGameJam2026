@@ -297,7 +297,7 @@ MainMenu.unity
 └── MainMenuCanvas           ← Canvas + MainMenuView
     ├── Background           (Image)
     ├── TitleArea            (Text × 2)
-    ├── MenuArea             (Button × 6)
+    ├── MenuArea             (Button × 5)
     ├── ShowcaseArea         (Image + CharacterCarousel)
     └── Panels/
         └── OverwriteSaveDialog   ← OverwriteSaveDialogView
@@ -308,7 +308,7 @@ MainMenu.unity
 | 组件 | 需要拖入的引用 |
 |------|----------------|
 | `MainMenuController` | `MainMenuView`、`OverwriteSaveDialogView`、`LevelDatabase` |
-| `MainMenuView` | 6 个菜单 Button、可选继续禁用遮罩、`CharacterCarousel` |
+| `MainMenuView` | 5 个菜单 Button、可选继续禁用遮罩、`CharacterCarousel` |
 | `OverwriteSaveDialogView` | `panelRoot`、动态/固定文案 Text、确认/取消 Button |
 | `CharacterCarousel` | `displayImage`、可选 `manualSprites` 或 `LevelDatabase` |
 
@@ -342,6 +342,11 @@ _Game/
 │   │   ├── MainMenuController.cs
 │   │   ├── MainMenuView.cs
 │   │   ├── OverwriteSaveDialogView.cs
+│   │   ├── ExitGameDialogView.cs
+│   │   ├── SettingsDialogView.cs
+│   │   ├── LevelAchievementView.cs
+│   │   ├── LevelAchievementItemView.cs
+│   │   ├── CreditsView.cs
 │   │   └── CharacterCarousel.cs
 │   ├── Data/
 │   │   ├── LevelDatabaseSO.cs

@@ -7,21 +7,21 @@ using UnityEditor;
 #endif
 
 /// <summary>
-/// 主界面逻辑：存档、场景切换、弹窗调度。UI 引用由 MainMenuView 等在 Inspector 拖入。
+/// 主界面逻辑：存档、场景切换、弹窗与面板调度。UI 引用由 View 在 Inspector 拖入。
 /// </summary>
 public class MainMenuController : MonoBehaviour
 {
     [Header("配置")]
     [SerializeField] private LevelDatabaseSO levelDatabase;
 
-    [Header("视图引用")]
+    [Header("主菜单")]
     [SerializeField] private MainMenuView menuView;
-    [SerializeField] private OverwriteSaveDialogView overwriteDialogView;
 
-    public event Action OnLevelAchievementRequested;
-    public event Action OnCreditsRequested;
-    public event Action OnRulesRequested;
-    public event Action OnSettingsRequested;
+    [Header("弹窗与面板")]
+    [SerializeField] private OverwriteSaveDialogView overwriteDialogView;
+    [SerializeField] private ExitGameDialogView exitGameDialogView;
+    [SerializeField] private LevelAchievementView levelAchievementView;
+    [SerializeField] private CreditsView creditsView;
 
     private void Awake()
     {
@@ -35,12 +35,12 @@ public class MainMenuController : MonoBehaviour
     private void OnEnable()
     {
         RefreshContinueButton();
-        SubscribeOverwriteDialog();
+        SubscribeDialogs();
     }
 
     private void OnDisable()
     {
-        UnsubscribeOverwriteDialog();
+        UnsubscribeDialogs();
     }
 
     public void OnContinueClicked()
@@ -62,6 +62,8 @@ public class MainMenuController : MonoBehaviour
     {
         if (SaveManager.Instance != null && SaveManager.Instance.HasSave)
         {
+            CloseAllPanels();
+
             if (overwriteDialogView != null)
             {
                 overwriteDialogView.ShowForNewGame();
@@ -80,46 +82,36 @@ public class MainMenuController : MonoBehaviour
 
     public void OnLevelAchievementClicked()
     {
-        if (OnLevelAchievementRequested != null)
-        {
-            OnLevelAchievementRequested.Invoke();
-            return;
-        }
+        CloseAllPanels();
 
-        Debug.Log("[MainMenuController] 关卡成就（Phase 4 接线）");
+        if (levelAchievementView != null)
+        {
+            levelAchievementView.Show(levelDatabase, SaveManager.Instance);
+        }
+        else
+        {
+            Debug.LogWarning("[MainMenuController] 未配置 LevelAchievementView。");
+        }
     }
 
     public void OnCreditsClicked()
     {
-        if (OnCreditsRequested != null)
-        {
-            OnCreditsRequested.Invoke();
-            return;
-        }
-
-        Debug.Log("[MainMenuController] 致谢名单（Phase 4 接线）");
+        CloseAllPanels();
+        creditsView?.Show();
     }
 
-    public void OnRulesClicked()
+    public void OnExitGameClicked()
     {
-        if (OnRulesRequested != null)
+        CloseAllPanels();
+
+        if (exitGameDialogView != null)
         {
-            OnRulesRequested.Invoke();
-            return;
+            exitGameDialogView.Show();
         }
-
-        Debug.Log("[MainMenuController] 规则（Phase 4 接线）");
-    }
-
-    public void OnSettingsClicked()
-    {
-        if (OnSettingsRequested != null)
+        else
         {
-            OnSettingsRequested.Invoke();
-            return;
+            ExitGameDialogView.QuitApplication();
         }
-
-        Debug.Log("[MainMenuController] 设置（Phase 4 接线）");
     }
 
     /// <summary>供关卡成就页选关时调用：有存档则弹覆盖确认。</summary>
@@ -127,6 +119,7 @@ public class MainMenuController : MonoBehaviour
     {
         if (SaveManager.Instance != null && SaveManager.Instance.HasSave && overwriteDialogView != null)
         {
+            CloseAllPanels();
             overwriteDialogView.ShowForLevelSelect(levelIndex);
             return;
         }
@@ -194,10 +187,7 @@ public class MainMenuController : MonoBehaviour
             menuView = FindObjectOfType<MainMenuView>();
         }
 
-        if (overwriteDialogView == null)
-        {
-            overwriteDialogView = FindObjectOfType<OverwriteSaveDialogView>();
-        }
+        ResolvePanelReferences();
 
         if (menuView != null)
         {
@@ -211,28 +201,67 @@ public class MainMenuController : MonoBehaviour
                 "[MainMenuController] 未找到 MainMenuView，请在场景中挂载并拖入按钮引用。",
                 this);
         }
+
+        CloseAllPanels();
     }
 
-    private void SubscribeOverwriteDialog()
+    private void ResolvePanelReferences()
     {
         if (overwriteDialogView == null)
         {
-            return;
+            overwriteDialogView = FindObjectOfType<OverwriteSaveDialogView>();
         }
 
-        overwriteDialogView.OnNewGameConfirmed += OnOverwriteNewGameConfirmed;
-        overwriteDialogView.OnLevelSelectConfirmed += OnOverwriteLevelSelectConfirmed;
+        if (exitGameDialogView == null)
+        {
+            exitGameDialogView = FindObjectOfType<ExitGameDialogView>();
+        }
+
+        if (levelAchievementView == null)
+        {
+            levelAchievementView = FindObjectOfType<LevelAchievementView>();
+        }
+
+        if (creditsView == null)
+        {
+            creditsView = FindObjectOfType<CreditsView>();
+        }
     }
 
-    private void UnsubscribeOverwriteDialog()
+    private void SubscribeDialogs()
     {
-        if (overwriteDialogView == null)
+        if (overwriteDialogView != null)
         {
-            return;
+            overwriteDialogView.OnNewGameConfirmed += OnOverwriteNewGameConfirmed;
+            overwriteDialogView.OnLevelSelectConfirmed += OnOverwriteLevelSelectConfirmed;
         }
 
-        overwriteDialogView.OnNewGameConfirmed -= OnOverwriteNewGameConfirmed;
-        overwriteDialogView.OnLevelSelectConfirmed -= OnOverwriteLevelSelectConfirmed;
+        if (levelAchievementView != null)
+        {
+            levelAchievementView.OnLevelEnterRequested += RequestEnterLevel;
+        }
+    }
+
+    private void UnsubscribeDialogs()
+    {
+        if (overwriteDialogView != null)
+        {
+            overwriteDialogView.OnNewGameConfirmed -= OnOverwriteNewGameConfirmed;
+            overwriteDialogView.OnLevelSelectConfirmed -= OnOverwriteLevelSelectConfirmed;
+        }
+
+        if (levelAchievementView != null)
+        {
+            levelAchievementView.OnLevelEnterRequested -= RequestEnterLevel;
+        }
+    }
+
+    private void CloseAllPanels()
+    {
+        overwriteDialogView?.Hide();
+        exitGameDialogView?.Hide();
+        levelAchievementView?.Hide();
+        creditsView?.Hide();
     }
 
     private void OnOverwriteNewGameConfirmed()
