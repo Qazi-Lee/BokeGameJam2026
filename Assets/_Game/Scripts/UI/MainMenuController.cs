@@ -387,7 +387,6 @@ public class MainMenuController : MonoBehaviour
 #endif
     }
 
-#if UNITY_EDITOR
     private void AssignAudioDatabaseIfMissing(AudioManager audioManager)
     {
         if (audioManager == null || audioDatabase == null)
@@ -423,7 +422,6 @@ public class MainMenuController : MonoBehaviour
 
         audioManager.SetLevelDatabase(levelDatabase);
     }
-#endif
 
     private void EnsureSceneBgmConfig()
     {
@@ -438,7 +436,6 @@ public class MainMenuController : MonoBehaviour
 #endif
     }
 
-#if UNITY_EDITOR
     private void AssignSceneBgmConfigIfMissing(MonoBehaviour manager)
     {
         if (manager == null || sceneBgmConfig == null)
@@ -466,7 +463,6 @@ public class MainMenuController : MonoBehaviour
             serializedObject.ApplyModifiedPropertiesWithoutUndo();
         }
     }
-#endif
 
     private void EnsureLevelDatabase()
     {
@@ -479,7 +475,6 @@ public class MainMenuController : MonoBehaviour
 #endif
     }
 
-#if UNITY_EDITOR
     private void AssignDatabaseIfMissing(MonoBehaviour manager)
     {
         if (manager == null || levelDatabase == null)
@@ -506,5 +501,4 @@ public class MainMenuController : MonoBehaviour
             serializedObject.ApplyModifiedPropertiesWithoutUndo();
         }
     }
-#endif
 }
