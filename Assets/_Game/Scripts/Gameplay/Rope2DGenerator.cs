@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [ExecuteAlways]
+[RequireComponent(typeof(RopeLengthLimiter2D))]
 public class Rope2DGenerator : MonoBehaviour
 {
     [Header("Endpoints")]
@@ -33,6 +34,14 @@ public class Rope2DGenerator : MonoBehaviour
     [SerializeField] private List<Transform> segments = new List<Transform>();
 
     private LineRenderer lineRenderer;
+    private RopeLengthLimiter2D ropeLengthLimiter;
+
+    private void Awake()
+    {
+        EnsureLineRenderer();
+        EnsureRopeLengthLimiter();
+        SyncRopeLengthLimiter();
+    }
 
     public void GenerateRope()
     {
@@ -87,6 +96,7 @@ public class Rope2DGenerator : MonoBehaviour
         endHingeJoint.enableCollision = enableSegmentCollision;
 
         UpdateVisual();
+        SyncRopeLengthLimiter();
     }
 
     public void ClearRope()
@@ -121,7 +131,9 @@ public class Rope2DGenerator : MonoBehaviour
         ropeLength = Mathf.Max(0.1f, ropeLength);
         ropeWidth = Mathf.Max(0.01f, ropeWidth);
         EnsureLineRenderer();
+        EnsureRopeLengthLimiter();
         UpdateLineStyle();
+        SyncRopeLengthLimiter();
         UpdateVisual();
     }
 
@@ -142,6 +154,19 @@ public class Rope2DGenerator : MonoBehaviour
         lineRenderer.numCapVertices = 4;
         lineRenderer.numCornerVertices = 2;
         UpdateLineStyle();
+    }
+
+    private void EnsureRopeLengthLimiter()
+    {
+        if (ropeLengthLimiter == null)
+        {
+            ropeLengthLimiter = GetComponent<RopeLengthLimiter2D>();
+        }
+
+        if (ropeLengthLimiter == null)
+        {
+            ropeLengthLimiter = gameObject.AddComponent<RopeLengthLimiter2D>();
+        }
     }
 
     private void UpdateLineStyle()
@@ -246,6 +271,17 @@ public class Rope2DGenerator : MonoBehaviour
         {
             DestroyImmediate(target);
         }
+    }
+
+    private void SyncRopeLengthLimiter()
+    {
+        EnsureRopeLengthLimiter();
+        if (ropeLengthLimiter == null)
+        {
+            return;
+        }
+
+        ropeLengthLimiter.Configure(startBody, endBody, ropeLength);
     }
 }
 
