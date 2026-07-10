@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float swingForce = 12f;
     [SerializeField] private KeyCode switchKey = KeyCode.F;
     [SerializeField] private KeyCode releaseBothKey = KeyCode.G;
+    [SerializeField] private KeyCode skipLevelKey = KeyCode.T;
     [SerializeField] private float reattachCooldown = 0.35f;
     [Header("Debug")]
     [SerializeField] private bool drawSwingTangent = true;
@@ -49,6 +50,12 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(releaseBothKey))
         {
             ReleaseBothPlayers();
+            return;
+        }
+
+        if (Input.GetKeyDown(skipLevelKey))
+        {
+            SkipCurrentLevel();
             return;
         }
 
@@ -356,6 +363,31 @@ public class PlayerController : MonoBehaviour
     private bool CanAcceptInput()
     {
         return GameStateManager.Instance == null || GameStateManager.Instance.IsPlaying;
+    }
+
+    private void SkipCurrentLevel()
+    {
+        if (SceneFlowManager.Instance == null || SceneFlowManager.Instance.IsLoading)
+        {
+            return;
+        }
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySfx(GameConstants.AudioNames.LevelClear);
+        }
+
+        if (SaveManager.Instance != null)
+        {
+            SaveManager.Instance.OnLevelCleared(SceneFlowManager.Instance.CurrentLevelIndex);
+        }
+
+        if (GameStateManager.Instance != null)
+        {
+            GameStateManager.Instance.EnterTransitioning();
+        }
+
+        SceneFlowManager.Instance.StartVictoryFlow();
     }
 
     private void ResolveVirtualCamera()
