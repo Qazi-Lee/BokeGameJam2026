@@ -43,6 +43,15 @@ public class SaveManager : BaseMonoManager<SaveManager>, ILevelStarProvider
         LoadFromDisk();
     }
 
+    /// <summary>运行时或主界面初始化时注入关卡配置表。</summary>
+    public void SetLevelDatabase(LevelDatabaseSO database)
+    {
+        if (database != null)
+        {
+            levelDatabase = database;
+        }
+    }
+
     /// <summary>开始新游戏：覆盖旧存档，从第 1 关（索引 0）开始。</summary>
     public void BeginNewGame()
     {

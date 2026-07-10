@@ -35,6 +35,15 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         EnsureTransitionUI();
     }
 
+    /// <summary>运行时或主界面初始化时注入关卡配置表。</summary>
+    public void SetLevelDatabase(LevelDatabaseSO database)
+    {
+        if (database != null)
+        {
+            levelDatabase = database;
+        }
+    }
+
     public void LoadScene(string sceneName, TransitionMode mode = TransitionMode.SimpleFade)
     {
         StartLoad(new SceneLoadRequest
