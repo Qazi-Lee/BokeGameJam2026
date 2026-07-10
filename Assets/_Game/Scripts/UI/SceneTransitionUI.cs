@@ -34,9 +34,18 @@ public class SceneTransitionUI : MonoBehaviour
     {
         EnsureUiBuilt();
         PrepareVisibleState();
-
-        overlayGroup.alpha = 0f;
         SetBlocking(true);
+
+        // 已是黑幕时跳过，避免 HoldBlack 后再淡出从透明闪一帧。
+        if (overlayGroup != null && overlayGroup.alpha >= 0.99f)
+        {
+            yield break;
+        }
+
+        if (overlayGroup != null)
+        {
+            overlayGroup.alpha = 0f;
+        }
 
         yield return AnimateAlpha(overlayGroup, 1f, fadeOutDuration);
     }
@@ -48,6 +57,35 @@ public class SceneTransitionUI : MonoBehaviour
         yield return AnimateAlpha(overlayGroup, 0f, fadeInDuration);
 
         HideImmediate();
+    }
+
+    /// <summary>收起转场黑幕，让介绍面板等内容显示在上层。</summary>
+    public void SuppressOverlayForContent()
+    {
+        EnsureUiBuilt();
+        KillActiveTween();
+
+        if (overlayGroup != null)
+        {
+            overlayGroup.alpha = 0f;
+        }
+
+        SetBlocking(false);
+    }
+
+    /// <summary>保持全屏黑幕，避免介绍关闭后露出底层场景。</summary>
+    public void HoldBlack()
+    {
+        EnsureUiBuilt();
+        PrepareVisibleState();
+        KillActiveTween();
+
+        if (overlayGroup != null)
+        {
+            overlayGroup.alpha = 1f;
+        }
+
+        SetBlocking(true);
     }
 
     public void HideImmediate()

@@ -166,7 +166,7 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         StartCoroutine(LoadSceneRoutine(request));
     }
 
-    /// <summary>统一的场景加载协程：转场淡出 → 异步加载 → 转场淡入 → 关卡介绍 → 恢复 Playing。</summary>
+    /// <summary>统一的场景加载协程：转场淡出 → 异步加载 → 关卡介绍（若有）→ 转场淡入 → 恢复 Playing。</summary>
     private IEnumerator LoadSceneRoutine(SceneLoadRequest request)
     {
         isLoading = true;
@@ -210,38 +210,42 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
             yield return null;
         }
 
+        // 有关卡介绍时先播介绍（黑幕/底层背景遮住场景），再淡入；避免先露关卡再出介绍。
+        if (ShouldPlayLevelIntro(request))
+        {
+            yield return PlayLevelIntroIfNeeded(request);
+        }
+
         yield return PlayTransitionIn();
-        yield return PlayLevelIntroIfNeeded(request);
         FinishLoad();
 
         Debug.Log($"[SceneFlowManager] 加载完成：{SceneManager.GetActiveScene().name}");
     }
 
-    private IEnumerator PlayLevelIntroIfNeeded(SceneLoadRequest request)
+    private bool ShouldPlayLevelIntro(SceneLoadRequest request)
     {
-        if (request.SkipLevelIntro || !EnsureDatabase())
+        if (request.SkipLevelIntro || !EnsureDatabase() || narrativeIntro == null)
         {
-            yield break;
+            return false;
         }
 
         string loadedSceneName = SceneManager.GetActiveScene().name;
         if (levelDatabase.IsMainMenuScene(loadedSceneName))
         {
-            yield break;
+            return false;
         }
 
-        int levelIndex = levelDatabase.GetIndexByScene(loadedSceneName);
-        if (levelIndex < 0)
+        return levelDatabase.GetIndexByScene(loadedSceneName) >= 0;
+    }
+
+    private IEnumerator PlayLevelIntroIfNeeded(SceneLoadRequest request)
+    {
+        if (!ShouldPlayLevelIntro(request))
         {
             yield break;
         }
 
-        if (narrativeIntro == null)
-        {
-            Debug.LogWarning("[SceneFlowManager] 未配置 NarrativeIntroController，跳过关卡介绍。");
-            yield break;
-        }
-
+        int levelIndex = levelDatabase.GetIndexByScene(SceneManager.GetActiveScene().name);
         yield return narrativeIntro.ShowLevelIntroAndWait(levelIndex);
     }
 
