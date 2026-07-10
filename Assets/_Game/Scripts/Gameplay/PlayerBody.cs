@@ -16,6 +16,7 @@ public class PlayerBody : MonoBehaviour
     private Vector3 cachedViewScale = Vector3.one;
     private Tween fixedScaleTween;
     private Transform attachedPoint;
+    private AttachPoint attachedAttachPoint;
 
     public bool IsFixed => isFixed;
     public Vector2 Position => body != null ? body.position : (Vector2)transform.position;
@@ -26,7 +27,7 @@ public class PlayerBody : MonoBehaviour
         EnsureInitialized();
     }
 
-    private void LateUpdate()
+    private void FixedUpdate()
     {
         FollowAttachedPoint();
     }
@@ -104,7 +105,19 @@ public class PlayerBody : MonoBehaviour
     {
         EnsureInitialized();
 
+        if (attachedAttachPoint != null)
+        {
+            attachedAttachPoint.DetachPlayer(this);
+            attachedAttachPoint = null;
+        }
+
         attachedPoint = point;
+        attachedAttachPoint = attachedPoint != null ? attachedPoint.GetComponent<AttachPoint>() : null;
+        if (attachedAttachPoint != null)
+        {
+            attachedAttachPoint.AttachPlayer(this);
+        }
+
         if (attachedPoint != null)
         {
             SnapToPosition(attachedPoint.position);
@@ -113,6 +126,12 @@ public class PlayerBody : MonoBehaviour
 
     public void DetachFromPoint()
     {
+        if (attachedAttachPoint != null)
+        {
+            attachedAttachPoint.DetachPlayer(this);
+            attachedAttachPoint = null;
+        }
+
         attachedPoint = null;
     }
 

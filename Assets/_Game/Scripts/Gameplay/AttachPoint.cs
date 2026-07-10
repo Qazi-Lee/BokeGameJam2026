@@ -1,10 +1,22 @@
-using UnityEngine;
 using DG.Tweening;
+using Sirenix.OdinInspector;
+using UnityEngine;
 
 public class AttachPoint : MonoBehaviour
 {
     [Header("Attach")]
     [SerializeField] private float attachRadius = 1.25f;
+
+    [Header("Movement")]
+    [SerializeField] private bool canMoveVerticallyWhileAttached;
+    [ShowIf(nameof(canMoveVerticallyWhileAttached))]
+    [SerializeField] private float verticalMoveSpeed = 3f;
+    [ShowIf(nameof(canMoveVerticallyWhileAttached))]
+    [SerializeField] private bool clampVerticalMovement;
+    [ShowIf("@this.canMoveVerticallyWhileAttached && this.clampVerticalMovement")]
+    [SerializeField] private float minYOffset = -2f;
+    [ShowIf("@this.canMoveVerticallyWhileAttached && this.clampVerticalMovement")]
+    [SerializeField] private float maxYOffset = 2f;
 
     [Header("Hint")]
     [SerializeField] private Transform hintRoot;
@@ -20,11 +32,75 @@ public class AttachPoint : MonoBehaviour
     [SerializeField] private bool drawGizmo = true;
     [SerializeField] private Color gizmoColor = new Color(0.2f, 0.9f, 0.3f, 0.9f);
 
+    private PlayerBody attachedPlayer;
+    private float initialLocalY;
+    private bool initialLocalYCaptured;
+    private float verticalInput;
     private bool hintVisible;
     private Vector3 cachedHintScale = Vector3.one;
     private Tween hintBreathTween;
 
     public Vector2 Position => transform.position;
+
+    private void Awake()
+    {
+        CaptureInitialLocalY();
+        EnsureHintRoot();
+        ApplyHintSprite();
+        HideHint(force: true);
+    }
+
+    private void Update()
+    {
+        UpdateVerticalInput();
+    }
+
+    private void FixedUpdate()
+    {
+        if (!canMoveVerticallyWhileAttached || attachedPlayer == null || !CanAcceptInput())
+        {
+            return;
+        }
+
+        if (Mathf.Approximately(verticalInput, 0f))
+        {
+            return;
+        }
+
+        MoveVertically(verticalInput);
+    }
+
+    private void LateUpdate()
+    {
+        SetHintVisible(ShouldShowHint());
+    }
+
+    private void OnValidate()
+    {
+        attachRadius = Mathf.Max(0.01f, attachRadius);
+        verticalMoveSpeed = Mathf.Max(0f, verticalMoveSpeed);
+
+        if (minYOffset > maxYOffset)
+        {
+            float temp = minYOffset;
+            minYOffset = maxYOffset;
+            maxYOffset = temp;
+        }
+
+        EnsureHintRoot();
+        ApplyHintSprite();
+
+        if (hintRoot != null)
+        {
+            hintRoot.localPosition = hintOffset;
+            cachedHintScale = hintRoot.localScale;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        StopHintBreath();
+    }
 
     public bool CanAttach(PlayerBody playerBody)
     {
@@ -48,32 +124,68 @@ public class AttachPoint : MonoBehaviour
         return offset.sqrMagnitude;
     }
 
-    private void Awake()
+    public void AttachPlayer(PlayerBody playerBody)
     {
-        EnsureHintRoot();
-        ApplyHintSprite();
-        HideHint();
+        attachedPlayer = playerBody;
     }
 
-    private void OnValidate()
+    public void DetachPlayer(PlayerBody playerBody)
     {
-        EnsureHintRoot();
-        ApplyHintSprite();
-
-        if (hintRoot != null)
+        if (attachedPlayer != playerBody)
         {
-            hintRoot.localPosition = hintOffset;
+            return;
+        }
+
+        attachedPlayer = null;
+        verticalInput = 0f;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (!drawGizmo)
+        {
+            return;
+        }
+
+        Gizmos.color = gizmoColor;
+        Gizmos.DrawWireSphere(transform.position, attachRadius);
+    }
+
+    private void UpdateVerticalInput()
+    {
+        if (!canMoveVerticallyWhileAttached || attachedPlayer == null || !CanAcceptInput())
+        {
+            verticalInput = 0f;
+            return;
+        }
+
+        verticalInput = 0f;
+        if (Input.GetKey(KeyCode.W))
+        {
+            verticalInput += 1f;
+        }
+
+        if (Input.GetKey(KeyCode.S))
+        {
+            verticalInput -= 1f;
         }
     }
 
-    private void LateUpdate()
+    private void MoveVertically(float input)
     {
-        SetHintVisible(ShouldShowHint());
-    }
+        CaptureInitialLocalY();
 
-    private void OnDestroy()
-    {
-        StopHintBreath();
+        Vector3 localPosition = transform.localPosition;
+        localPosition.y += input * verticalMoveSpeed * Time.fixedDeltaTime;
+
+        if (clampVerticalMovement)
+        {
+            float minY = initialLocalY + minYOffset;
+            float maxY = initialLocalY + maxYOffset;
+            localPosition.y = Mathf.Clamp(localPosition.y, minY, maxY);
+        }
+
+        transform.localPosition = localPosition;
     }
 
     private bool ShouldShowHint()
@@ -137,7 +249,7 @@ public class AttachPoint : MonoBehaviour
             return;
         }
 
-        HideHint();
+        HideHint(force: false);
     }
 
     private void ShowHint()
@@ -153,9 +265,14 @@ public class AttachPoint : MonoBehaviour
         StartHintBreath();
     }
 
-    private void HideHint()
+    private void HideHint(bool force)
     {
-        if (hintRoot == null || !hintVisible)
+        if (hintRoot == null)
+        {
+            return;
+        }
+
+        if (!hintVisible && !force)
         {
             return;
         }
@@ -195,14 +312,19 @@ public class AttachPoint : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmosSelected()
+    private bool CanAcceptInput()
     {
-        if (!drawGizmo)
+        return GameStateManager.Instance == null || GameStateManager.Instance.IsPlaying;
+    }
+
+    private void CaptureInitialLocalY()
+    {
+        if (initialLocalYCaptured)
         {
             return;
         }
 
-        Gizmos.color = gizmoColor;
-        Gizmos.DrawWireSphere(transform.position, attachRadius);
+        initialLocalY = transform.localPosition.y;
+        initialLocalYCaptured = true;
     }
 }
