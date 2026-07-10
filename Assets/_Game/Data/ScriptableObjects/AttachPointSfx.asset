@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: AttachPointSfx
   m_EditorClassIdentifier: 
   audioClipList:
-  - {fileID: 8300000, guid: 976fce3b749dd154d96d872cfb99c719, type: 3}
+  - {fileID: 8300000, guid: 87bb221024a59a64c9811f552c17cf07, type: 3}

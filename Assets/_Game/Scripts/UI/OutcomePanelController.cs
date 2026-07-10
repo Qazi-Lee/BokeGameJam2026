@@ -51,14 +51,18 @@ public class OutcomePanelController : MonoBehaviour
 
     private void Update()
     {
-        if (!IsShowingDefeat)
+        if (!Input.GetKeyDown(KeyCode.Space))
         {
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (IsShowingDefeat)
         {
             OnDefeatRestartClicked();
+        }
+        else if (IsShowingVictory)
+        {
+            OnVictoryContinueClicked();
         }
     }
 

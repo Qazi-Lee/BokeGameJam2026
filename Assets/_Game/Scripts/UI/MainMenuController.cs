@@ -16,6 +16,7 @@ public class MainMenuController : MonoBehaviour
     [SerializeField] private LevelDatabaseSO levelDatabase;
     [SerializeField] private SceneBgmConfigSO sceneBgmConfig;
     [SerializeField] private AudioDatabaseSO audioDatabase;
+    [SerializeField] private VideoDatabaseSO videoDatabase;
 
     [Header("主菜单")]
     [SerializeField] private MainMenuView menuView;
@@ -26,11 +27,14 @@ public class MainMenuController : MonoBehaviour
     [SerializeField] private LevelAchievementView levelAchievementView;
     [SerializeField] private CreditsView creditsView;
 
+    private bool isCreditsVideoPlaying;
+
     private void Awake()
     {
         EnsureLevelDatabase();
         EnsureSceneBgmConfig();
         EnsureAudioDatabase();
+        EnsureVideoDatabase();
         EnsureEventSystem();
         EnsureManagers();
         BindViews();
@@ -102,8 +106,28 @@ public class MainMenuController : MonoBehaviour
 
     public void OnCreditsClicked()
     {
+        if (isCreditsVideoPlaying)
+        {
+            return;
+        }
+
         CloseAllPanels();
-        creditsView?.Show();
+        StartCoroutine(PlayCreditsVideoRoutine());
+    }
+
+    private IEnumerator PlayCreditsVideoRoutine()
+    {
+        VideoPlaybackController videoPlayback = SceneFlowManager.Instance?.VideoPlayback;
+        if (videoPlayback == null)
+        {
+            Debug.LogWarning("[MainMenuController] VideoPlaybackController 不可用，无法播放致谢视频。");
+            yield break;
+        }
+
+        isCreditsVideoPlaying = true;
+        yield return videoPlayback.PlayCreditsAndWait();
+        isCreditsVideoPlaying = false;
+        AudioManager.Instance?.PlayMusicForActiveScene();
     }
 
     public void OnExitGameClicked()
@@ -364,6 +388,11 @@ public class MainMenuController : MonoBehaviour
             audioManager.SetAudioDatabase(audioDatabase);
         }
 
+        if (videoDatabase != null)
+        {
+            sceneFlowManager.SetVideoDatabase(videoDatabase);
+        }
+
 #if UNITY_EDITOR
         AssignDatabaseIfMissing(saveManager);
         AssignDatabaseIfMissing(sceneFlowManager);
@@ -384,6 +413,19 @@ public class MainMenuController : MonoBehaviour
 #if UNITY_EDITOR
         audioDatabase = AssetDatabase.LoadAssetAtPath<AudioDatabaseSO>(
             "Assets/_Game/Data/ScriptableObjects/AudioDatabase.asset");
+#endif
+    }
+
+    private void EnsureVideoDatabase()
+    {
+        if (videoDatabase != null)
+        {
+            return;
+        }
+
+#if UNITY_EDITOR
+        videoDatabase = AssetDatabase.LoadAssetAtPath<VideoDatabaseSO>(
+            "Assets/_Game/Data/ScriptableObjects/VideoDatabase.asset");
 #endif
     }
 

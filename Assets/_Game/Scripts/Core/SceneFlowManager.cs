@@ -19,11 +19,13 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
     [Header("配置")]
     [SerializeField] private LevelDatabaseSO levelDatabase;
     [SerializeField] private SceneBgmConfigSO sceneBgmConfig;
+    [SerializeField] private VideoDatabaseSO videoDatabase;
 
     [Header("组件")]
     [SerializeField] private SceneTransitionUI transitionUI;
     [SerializeField] private NarrativeIntroController narrativeIntro;
     [SerializeField] private OutcomePanelController outcomePanels;
+    [SerializeField] private VideoPlaybackController videoPlayback;
 
     [Header("关卡 UI 预制体（Build 需在 Inspector 指定，Editor 可自动补引用）")]
     [SerializeField] private GameObject topBarPrefab;
@@ -39,6 +41,8 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
     public NarrativeIntroController NarrativeIntro => narrativeIntro;
 
     public OutcomePanelController OutcomePanels => outcomePanels;
+
+    public VideoPlaybackController VideoPlayback => videoPlayback;
 
     public TopBarController TopBar => topBar;
 
@@ -56,10 +60,12 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         base.Awake();
 #if UNITY_EDITOR
         EnsureUiPrefabReferences();
+        EnsureVideoDatabaseReference();
 #endif
         EnsureTransitionUI();
         EnsureNarrativeIntro();
         EnsureOutcomePanels();
+        EnsureVideoPlayback();
         SyncTopBarVisibility();
     }
 
@@ -101,6 +107,18 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         {
             AudioManager.Instance.SetSceneBgmConfig(config);
         }
+    }
+
+    public void SetVideoDatabase(VideoDatabaseSO database)
+    {
+        if (database == null)
+        {
+            return;
+        }
+
+        videoDatabase = database;
+        EnsureVideoPlayback();
+        videoPlayback?.Configure(database.EndingVideo, database.CreditsVideo);
     }
 
     public void LoadScene(string sceneName, TransitionMode mode = TransitionMode.SimpleFade)
@@ -145,11 +163,7 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         if (currentIndex >= 0 && levelDatabase.IsLastLevel(currentIndex))
         {
             OnAllLevelsCompleted();
-            StartLoad(new SceneLoadRequest
-            {
-                TargetSceneName = levelDatabase.MainMenuSceneName,
-                Mode = TransitionMode.SimpleFade
-            });
+            StartCoroutine(CompleteGameWithEndingVideoRoutine());
             return;
         }
 
@@ -188,6 +202,22 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
     protected virtual void OnAllLevelsCompleted()
     {
         Debug.Log("[SceneFlowManager] OnAllLevelsCompleted");
+    }
+
+    private IEnumerator CompleteGameWithEndingVideoRoutine()
+    {
+        EnsureVideoPlayback();
+
+        if (videoPlayback != null)
+        {
+            yield return videoPlayback.PlayEndingAndWait();
+        }
+
+        StartLoad(new SceneLoadRequest
+        {
+            TargetSceneName = levelDatabase.MainMenuSceneName,
+            Mode = TransitionMode.SimpleFade
+        });
     }
 
     private void StartLoad(SceneLoadRequest request)
@@ -462,6 +492,24 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         }
     }
 
+    private void EnsureVideoPlayback()
+    {
+        if (videoPlayback == null)
+        {
+            videoPlayback = GetComponent<VideoPlaybackController>();
+        }
+
+        if (videoPlayback == null)
+        {
+            videoPlayback = gameObject.AddComponent<VideoPlaybackController>();
+        }
+
+        if (videoDatabase != null)
+        {
+            videoPlayback.Configure(videoDatabase.EndingVideo, videoDatabase.CreditsVideo);
+        }
+    }
+
     private bool EnsureDatabase()
     {
         if (levelDatabase != null)
@@ -485,6 +533,17 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         {
             vandDPanelPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(DefaultVandDPanelPrefabPath);
         }
+    }
+
+    private void EnsureVideoDatabaseReference()
+    {
+        if (videoDatabase != null)
+        {
+            return;
+        }
+
+        videoDatabase = AssetDatabase.LoadAssetAtPath<VideoDatabaseSO>(
+            "Assets/_Game/Data/ScriptableObjects/VideoDatabase.asset");
     }
 #endif
 
