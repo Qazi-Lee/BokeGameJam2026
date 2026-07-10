@@ -17,7 +17,14 @@ public class NarrativeIntroController : MonoBehaviour
     public const int FirstLevelPageIndex = 1;
     public const int PageCount = 5;
 
-    private const string LevelBackgroundPathFormat = "Assets/_Game/Art/Sprites/Level{0}BGD.png";
+    private static readonly string[] DefaultPageBackgroundPaths =
+    {
+        null, // Panel0 = 新游戏，保持纯黑
+        "Assets/_Game/Art/Sprites/Level1BGD.png",
+        "Assets/_Game/Art/Sprites/Level2BGD.png",
+        "Assets/_Game/Art/Sprites/Level3BGD.png",
+        "Assets/_Game/Art/Sprites/level4BGD.jpg",
+    };
 
     private static readonly string[] DefaultPanelPrefabPaths =
     {
@@ -31,7 +38,7 @@ public class NarrativeIntroController : MonoBehaviour
     [Header("独立面板预制体（Panel0=新游戏，Panel1~4=各关）")]
     [SerializeField] private GameObject[] panelPrefabs = new GameObject[PageCount];
 
-    [Header("底层背景（对应 Panel0~4；留空则 Panel1~4 自动加载 Level{n}BGD，Panel0/缺图用纯黑）")]
+    [Header("底层背景（对应 Panel0~4；留空则 Panel1~4 自动加载默认 BGD，Panel0/缺图用纯黑；已手动指定的槽位不会被覆盖）")]
     [SerializeField] private Sprite[] pageBackgrounds = new Sprite[PageCount];
     [SerializeField] [Range(0f, 1f)] private float backdropMaskAlpha = 0.35f;
 
@@ -46,6 +53,7 @@ public class NarrativeIntroController : MonoBehaviour
     private Image backdropBackgroundImage;
     private Image backdropMaskImage;
     private SceneTransitionUI transitionUI;
+    private bool pageBackgroundsEnsured;
 
     public bool IsShowing { get; private set; }
 
@@ -331,12 +339,14 @@ public class NarrativeIntroController : MonoBehaviour
 
     private void EnsurePageBackgrounds()
     {
-        if (pageBackgrounds == null || pageBackgrounds.Length < PageCount)
+        if (pageBackgroundsEnsured)
         {
-            pageBackgrounds = new Sprite[PageCount];
+            return;
         }
 
-        // Panel0 = 新游戏，保持纯黑（不自动填图）
+        pageBackgroundsEnsured = true;
+        EnsurePageBackgroundArraySize();
+
         for (int i = FirstLevelPageIndex; i < PageCount; i++)
         {
             if (pageBackgrounds[i] != null)
@@ -344,10 +354,34 @@ public class NarrativeIntroController : MonoBehaviour
                 continue;
             }
 
-            int levelNumber = i;
-            string assetPath = string.Format(LevelBackgroundPathFormat, levelNumber);
-            pageBackgrounds[i] = AssetDatabase.LoadAssetAtPath<Sprite>(assetPath);
+            if (i >= DefaultPageBackgroundPaths.Length ||
+                string.IsNullOrEmpty(DefaultPageBackgroundPaths[i]))
+            {
+                continue;
+            }
+
+            pageBackgrounds[i] = AssetDatabase.LoadAssetAtPath<Sprite>(DefaultPageBackgroundPaths[i]);
         }
+    }
+
+    private void EnsurePageBackgroundArraySize()
+    {
+        if (pageBackgrounds != null && pageBackgrounds.Length >= PageCount)
+        {
+            return;
+        }
+
+        Sprite[] resized = new Sprite[PageCount];
+        if (pageBackgrounds != null)
+        {
+            int copyCount = Mathf.Min(pageBackgrounds.Length, PageCount);
+            for (int i = 0; i < copyCount; i++)
+            {
+                resized[i] = pageBackgrounds[i];
+            }
+        }
+
+        pageBackgrounds = resized;
     }
 #endif
 }
