@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: flash11
-  m_Shader: {fileID: 4800000, guid: 4286cd55c80659547a303f15e583d256, type: 3}
+  m_Name: ci
+  m_Shader: {fileID: 4800000, guid: d0e6c66ca10d3be498061bc8af791402, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -25,15 +25,15 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _DissolveTex:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
+        m_Texture: {fileID: 2800000, guid: 87ee1dfc60085c94bb500344d7299405, type: 3}
+        m_Scale: {x: 1, y: 0.5}
         m_Offset: {x: 0, y: 0}
     - _DistortTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: b2e66cab71513f74faa8ce026ca57ff8, type: 3}
+        m_Texture: {fileID: 2800000, guid: 223b8845849ed1642b8344f23e021ea6, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MaskTex:
@@ -42,11 +42,11 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _ColorIntensity: 3
+    - _ColorIntensity: 1
     - _Cull: 0
     - _DissolveChannel: 0
-    - _DissolveEdgeIntensity: 2
-    - _DissolveEdgeWidth: 0.1
+    - _DissolveEdgeIntensity: 1.47
+    - _DissolveEdgeWidth: 0.03
     - _DissolveInvert: 0
     - _DissolveOn: 0
     - _DissolveProgress: 0
@@ -63,10 +63,10 @@ Material:
     - _ZTest: 4
     - _ZWrite: 0
     m_Colors:
-    - _DissolveEdgeColor: {r: 1, g: 0.6, b: 0.1, a: 1}
+    - _DissolveEdgeColor: {r: 0.10196078, g: 0.822208, b: 1, a: 1}
     - _DissolvePanner: {r: 0, g: 0, b: 0, a: 0}
     - _DistortPanner: {r: 0, g: 0, b: 0, a: 0}
-    - _MainColor: {r: 2, g: 2, b: 2, a: 1}
+    - _MainColor: {r: 1, g: 1, b: 1, a: 1}
     - _MainPanner: {r: 0, g: 0, b: 0, a: 0}
     - _MaskPanner: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
