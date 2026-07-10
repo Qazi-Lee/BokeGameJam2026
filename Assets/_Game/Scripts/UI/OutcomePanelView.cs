@@ -28,6 +28,7 @@ public class OutcomePanelView : MonoBehaviour
     {
         ResolveReferences();
         ApplyCenteredPosition();
+        DisableMaskRaycastBlocking();
         gameObject.SetActive(true);
     }
 
@@ -82,6 +83,36 @@ public class OutcomePanelView : MonoBehaviour
         {
             actionButton = defeatButton.GetComponent<Button>();
             IsVictoryPanel = false;
+        }
+    }
+
+    /// <summary>
+    /// 预制体 mask 带 World Space Canvas + GraphicRaycaster，会拦截按钮点击。
+    /// </summary>
+    private void DisableMaskRaycastBlocking()
+    {
+        Transform mask = FindChildRecursive(transform, "mask");
+        if (mask == null)
+        {
+            return;
+        }
+
+        GraphicRaycaster raycaster = mask.GetComponent<GraphicRaycaster>();
+        if (raycaster != null)
+        {
+            Object.Destroy(raycaster);
+        }
+
+        Canvas maskCanvas = mask.GetComponent<Canvas>();
+        if (maskCanvas != null)
+        {
+            Object.Destroy(maskCanvas);
+        }
+
+        Image image = mask.GetComponent<Image>();
+        if (image != null)
+        {
+            image.raycastTarget = false;
         }
     }
 

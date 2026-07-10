@@ -372,10 +372,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlaySfx(GameConstants.AudioNames.LevelClear);
-        }
+        AudioManager.Instance?.PlayLevelClear();
 
         if (SaveManager.Instance != null)
         {

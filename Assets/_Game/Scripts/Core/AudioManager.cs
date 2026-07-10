@@ -45,8 +45,8 @@ public class AudioManager : BaseMonoManager<AudioManager>
     [SerializeField] private SceneBgmConfigSO sceneBgmConfig;
     [SerializeField] private LevelDatabaseSO levelDatabase;
 
-    [Header("游戏结束音乐")]
-    [SerializeField] private bool gameOverMusicLoop = true;
+    [Header("游戏结束音效")]
+    [SerializeField] private bool gameOverMusicLoop = false;
 
     private AudioSource bgmSource;
     private AudioSource sfxSource;
@@ -134,7 +134,7 @@ public class AudioManager : BaseMonoManager<AudioManager>
         PlayMusicForScene(SceneManager.GetActiveScene().name);
     }
 
-    /// <summary>进入游戏结束音乐（占用 BGM 通道，停止关卡 BGM）。</summary>
+    /// <summary>播放失败音效（占用 BGM 通道，停止关卡 BGM，仅播放一次）。</summary>
     public void EnterGameOverMusic()
     {
         PlayMusic(GameConstants.AudioNames.GameOverBGM, MusicContext.GameOver, gameOverMusicLoop);
@@ -156,9 +156,10 @@ public class AudioManager : BaseMonoManager<AudioManager>
         PlaySfx(GameConstants.AudioNames.ButtonClick);
     }
 
+    /// <summary>播放通关音效（占用 BGM 通道，停止关卡 BGM，仅播放一次）。</summary>
     public void PlayLevelClear(float volumeScale = 1f)
     {
-        PlaySfx(GameConstants.AudioNames.LevelClear, volumeScale);
+        PlayMusic(GameConstants.AudioNames.LevelClear, MusicContext.GameOver, false);
     }
 
     public void PlayAttachPoint(float volumeScale = 1f)

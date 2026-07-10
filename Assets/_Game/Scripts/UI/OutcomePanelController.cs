@@ -260,8 +260,49 @@ public class OutcomePanelController : MonoBehaviour
             OutcomePanelView.CenterInParent(panelRect);
         }
 
+        NormalizePanelHierarchy(panelRoot);
+
         CachePanelViews(panelRoot.transform);
         HideAll();
+    }
+
+    /// <summary>
+    /// VandDPanel 与各面板 mask 使用 World Space Canvas，嵌在 Screen Space Overlay 下会导致射线无法命中按钮。
+    /// </summary>
+    private static void NormalizePanelHierarchy(GameObject panelRoot)
+    {
+        Canvas rootCanvas = panelRoot.GetComponent<Canvas>();
+        if (rootCanvas != null)
+        {
+            Object.Destroy(rootCanvas);
+        }
+
+        CanvasScaler rootScaler = panelRoot.GetComponent<CanvasScaler>();
+        if (rootScaler != null)
+        {
+            Object.Destroy(rootScaler);
+        }
+
+        GraphicRaycaster[] raycasters = panelRoot.GetComponentsInChildren<GraphicRaycaster>(true);
+        foreach (GraphicRaycaster raycaster in raycasters)
+        {
+            Object.Destroy(raycaster);
+        }
+
+        Canvas[] nestedCanvases = panelRoot.GetComponentsInChildren<Canvas>(true);
+        foreach (Canvas nestedCanvas in nestedCanvases)
+        {
+            Object.Destroy(nestedCanvas);
+        }
+
+        Image[] images = panelRoot.GetComponentsInChildren<Image>(true);
+        foreach (Image image in images)
+        {
+            if (image.gameObject.name == "mask")
+            {
+                image.raycastTarget = false;
+            }
+        }
     }
 
     private void CachePanelViews(Transform root)

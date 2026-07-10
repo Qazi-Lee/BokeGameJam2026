@@ -880,7 +880,7 @@ MonoBehaviour:
   audioDatabase: {fileID: 0}
   sceneBgmConfig: {fileID: 0}
   levelDatabase: {fileID: 0}
-  gameOverMusicLoop: 1
+  gameOverMusicLoop: 0
 --- !u!82 &352196685
 AudioSource:
   m_ObjectHideFlags: 0
