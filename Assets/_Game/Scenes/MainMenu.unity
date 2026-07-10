@@ -567,6 +567,8 @@ MonoBehaviour:
   transitionUI: {fileID: 0}
   narrativeIntro: {fileID: 0}
   outcomePanels: {fileID: 0}
+  topBarPrefab: {fileID: 916544065925914488, guid: 26fe160434bb36c4ca976fe3558da948, type: 3}
+  vandDPanelPrefab: {fileID: 8398417362712518566, guid: 3aae237aba7b3474d8ca6b338aec4dae, type: 3}
 --- !u!4 &1587238563
 Transform:
   m_ObjectHideFlags: 0

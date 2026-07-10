@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: StoryTypingSfx
   m_EditorClassIdentifier: 
   audioClipList:
-  - {fileID: 8300000, guid: 545273989ee82254e93c6794d0388ddb, type: 3}
+  - {fileID: 8300000, guid: 9c690fb9213e56f42b08392e60748f67, type: 3}

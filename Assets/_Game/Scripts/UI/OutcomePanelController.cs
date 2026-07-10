@@ -31,6 +31,16 @@ public class OutcomePanelController : MonoBehaviour
     public bool IsShowingVictory { get; private set; }
     public bool IsShowingDefeat { get; private set; }
 
+    public void SetVandDPanelPrefab(GameObject prefab)
+    {
+        if (prefab == null)
+        {
+            return;
+        }
+
+        vandDPanelPrefab = prefab;
+    }
+
     private void Awake()
     {
 #if UNITY_EDITOR

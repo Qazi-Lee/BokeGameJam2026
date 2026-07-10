@@ -14,6 +14,7 @@ using UnityEditor;
 public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
 {
     private const string DefaultTopBarPrefabPath = "Assets/_Game/Prefabs/UI/PanelsSum/TopBar.prefab";
+    private const string DefaultVandDPanelPrefabPath = "Assets/_Game/Prefabs/UI/PanelsSum/VandDPanel.prefab";
 
     [Header("配置")]
     [SerializeField] private LevelDatabaseSO levelDatabase;
@@ -24,8 +25,9 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
     [SerializeField] private NarrativeIntroController narrativeIntro;
     [SerializeField] private OutcomePanelController outcomePanels;
 
-    [Header("关卡顶部栏（仅关卡场景显示）")]
+    [Header("关卡 UI 预制体（Build 需在 Inspector 指定，Editor 可自动补引用）")]
     [SerializeField] private GameObject topBarPrefab;
+    [SerializeField] private GameObject vandDPanelPrefab;
 
     private bool isLoading;
     private TopBarController topBar;
@@ -53,7 +55,7 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
     {
         base.Awake();
 #if UNITY_EDITOR
-        EnsureTopBarPrefabReference();
+        EnsureUiPrefabReferences();
 #endif
         EnsureTransitionUI();
         EnsureNarrativeIntro();
@@ -391,9 +393,6 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
 
     private void EnsureTopBar()
     {
-#if UNITY_EDITOR
-        EnsureTopBarPrefabReference();
-#endif
         if (topBar != null)
         {
             return;
@@ -456,6 +455,11 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         {
             outcomePanels = gameObject.AddComponent<OutcomePanelController>();
         }
+
+        if (vandDPanelPrefab != null)
+        {
+            outcomePanels.SetVandDPanelPrefab(vandDPanelPrefab);
+        }
     }
 
     private bool EnsureDatabase()
@@ -470,14 +474,17 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
     }
 
 #if UNITY_EDITOR
-    private void EnsureTopBarPrefabReference()
+    private void EnsureUiPrefabReferences()
     {
-        if (topBarPrefab != null)
+        if (topBarPrefab == null)
         {
-            return;
+            topBarPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(DefaultTopBarPrefabPath);
         }
 
-        topBarPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(DefaultTopBarPrefabPath);
+        if (vandDPanelPrefab == null)
+        {
+            vandDPanelPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(DefaultVandDPanelPrefabPath);
+        }
     }
 #endif
 
