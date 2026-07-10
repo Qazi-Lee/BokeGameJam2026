@@ -4,10 +4,13 @@ using UnityEngine.UI;
 
 /// <summary>
 /// 关卡成就面板 View：读取解锁状态与关卡名，选关时通知 Controller。
-/// 无星级版默认隐藏三星与「恢复初始」按钮。
+/// 星数显示：关闭 StarDark 下未获得星数对应的亮星星物体，获得的几颗保持显示。
 /// </summary>
 public class LevelAchievementView : MonoBehaviour
 {
+    private const int LevelCount = 4;
+    private const int StarsPerLevel = 3;
+
     [Header("面板")]
     [SerializeField] private GameObject panelRoot;
 
@@ -21,33 +24,27 @@ public class LevelAchievementView : MonoBehaviour
     [Header("星级显示（扩展 Phase 前保持关闭）")]
     [SerializeField] private bool showStars;
 
+    [Header("亮星物体（可选，留空则自动绑定 StarDark 下亮星星子节点）")]
+    [SerializeField] private GameObject[] starBrightObjects = new GameObject[LevelCount * StarsPerLevel];
+
+    [Header("显示层级（嵌套 Canvas 时确保盖在主菜单之上）")]
+    [SerializeField] private int panelSortingOrder = 100;
+
     /// <summary>玩家选择进入某关时触发。</summary>
     public event Action<int> OnLevelEnterRequested;
 
-    private void Awake()
-    {
-        if (closeButton != null)
-        {
-            closeButton.onClick.AddListener(OnCloseClicked);
-        }
-
-        if (resetProgressButton != null)
-        {
-            resetProgressButton.gameObject.SetActive(false);
-            resetProgressButton.interactable = false;
-        }
-
-        BindLevelItems();
-        Hide();
-    }
+    private bool isInitialized;
 
     /// <summary>打开面板并刷新关卡列表。</summary>
     public void Show(LevelDatabaseSO levelDatabase, SaveManager saveManager)
     {
+        EnsureInitialized();
         Refresh(levelDatabase, saveManager);
 
         if (panelRoot != null)
         {
+            EnsurePanelCoversScreen();
+            EnsurePanelCanvasOnTop();
             panelRoot.SetActive(true);
         }
     }
@@ -60,6 +57,106 @@ public class LevelAchievementView : MonoBehaviour
         }
     }
 
+    private void EnsureInitialized()
+    {
+        if (isInitialized)
+        {
+            return;
+        }
+
+        isInitialized = true;
+        ResolveReferences();
+        EnsureGraphicRaycaster();
+        EnsureStarBrightBindings();
+        EnsureStarFrameLayerVisible();
+        BindLevelItems();
+
+        if (closeButton != null)
+        {
+            closeButton.onClick.RemoveListener(OnCloseClicked);
+            closeButton.onClick.AddListener(OnCloseClicked);
+        }
+
+        if (resetProgressButton != null)
+        {
+            resetProgressButton.gameObject.SetActive(false);
+            resetProgressButton.interactable = false;
+        }
+    }
+
+    private void ResolveReferences()
+    {
+        if (panelRoot == null)
+        {
+            panelRoot = gameObject;
+        }
+
+        if (closeButton == null)
+        {
+            Transform backButton = FindChildRecursive(transform, "btn_back");
+            if (backButton != null)
+            {
+                closeButton = backButton.GetComponent<Button>();
+            }
+        }
+    }
+
+    private void EnsureGraphicRaycaster()
+    {
+        if (panelRoot == null)
+        {
+            return;
+        }
+
+        if (panelRoot.GetComponent<GraphicRaycaster>() == null)
+        {
+            panelRoot.AddComponent<GraphicRaycaster>();
+        }
+    }
+
+    private void EnsurePanelCoversScreen()
+    {
+        if (panelRoot == null)
+        {
+            return;
+        }
+
+        RectTransform rect = panelRoot.transform as RectTransform;
+        if (rect != null)
+        {
+            rect.localScale = Vector3.one;
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.anchoredPosition = Vector2.zero;
+            rect.sizeDelta = Vector2.zero;
+            rect.pivot = new Vector2(0.5f, 0.5f);
+        }
+
+        Image background = panelRoot.GetComponent<Image>();
+        if (background != null)
+        {
+            background.enabled = true;
+            background.raycastTarget = true;
+        }
+    }
+
+    private void EnsurePanelCanvasOnTop()
+    {
+        if (panelRoot == null)
+        {
+            return;
+        }
+
+        Canvas canvas = panelRoot.GetComponent<Canvas>();
+        if (canvas == null)
+        {
+            return;
+        }
+
+        canvas.overrideSorting = true;
+        canvas.sortingOrder = panelSortingOrder;
+    }
+
     private void OnCloseClicked()
     {
         AudioManager.Instance?.PlayButtonClick();
@@ -69,6 +166,8 @@ public class LevelAchievementView : MonoBehaviour
     /// <summary>根据存档与关卡表刷新各行状态。</summary>
     public void Refresh(LevelDatabaseSO levelDatabase, SaveManager saveManager)
     {
+        RefreshStarDisplay(saveManager);
+
         if (levelItems == null || levelItems.Length == 0)
         {
             return;
@@ -90,6 +189,153 @@ public class LevelAchievementView : MonoBehaviour
 
             item.Apply(unlocked, displayName, starCount, showStars);
         }
+    }
+
+    private void RefreshStarDisplay(SaveManager saveManager)
+    {
+        EnsureStarFrameLayerVisible();
+        EnsureStarBrightBindings();
+
+        if (!HasConfiguredStarBrightObjects())
+        {
+            Debug.LogWarning("[LevelAchievementView] 未找到 StarDark 亮星引用，无法刷新星数。", this);
+            return;
+        }
+
+        for (int level = 0; level < LevelCount; level++)
+        {
+            int starCount = saveManager != null ? saveManager.GetStarCount(level) : 0;
+            starCount = Mathf.Clamp(starCount, 0, StarsPerLevel);
+
+            for (int star = 0; star < StarsPerLevel; star++)
+            {
+                int index = level * StarsPerLevel + star;
+                GameObject brightStar = starBrightObjects[index];
+                if (brightStar == null)
+                {
+                    continue;
+                }
+
+                // 存档 N 星：仅前 N 个亮星星保持显示，其余关闭
+                brightStar.SetActive(star < starCount);
+            }
+        }
+    }
+
+    private void EnsureStarBrightBindings()
+    {
+        if (HasConfiguredStarBrightObjects())
+        {
+            return;
+        }
+
+        Transform starDarkRoot = FindChildRecursive(transform, "StarDark");
+        if (starDarkRoot == null)
+        {
+            Debug.LogWarning("[LevelAchievementView] 未找到 StarDark 节点。", this);
+            return;
+        }
+
+        var collected = new System.Collections.Generic.List<GameObject>();
+        for (int i = 0; i < starDarkRoot.childCount; i++)
+        {
+            Transform child = starDarkRoot.GetChild(i);
+            Image image = child.GetComponent<Image>();
+            if (image != null && IsBrightStarSprite(image.sprite))
+            {
+                collected.Add(child.gameObject);
+            }
+        }
+
+        if (collected.Count < LevelCount * StarsPerLevel)
+        {
+            collected.Clear();
+            for (int i = 0; i < starDarkRoot.childCount; i++)
+            {
+                collected.Add(starDarkRoot.GetChild(i).gameObject);
+            }
+        }
+
+        if (collected.Count < LevelCount * StarsPerLevel)
+        {
+            Debug.LogWarning(
+                $"[LevelAchievementView] StarDark 亮星节点不足 {LevelCount * StarsPerLevel} 个（当前 {collected.Count}）。",
+                this);
+            return;
+        }
+
+        starBrightObjects = new GameObject[LevelCount * StarsPerLevel];
+        for (int i = 0; i < starBrightObjects.Length; i++)
+        {
+            starBrightObjects[i] = collected[i];
+        }
+    }
+
+    private static bool IsBrightStarSprite(Sprite sprite)
+    {
+        if (sprite == null)
+        {
+            return false;
+        }
+
+        return sprite.name.Contains("亮星星") || sprite.name.Contains("亮星");
+    }
+
+    private void EnsureStarFrameLayerVisible()
+    {
+        Transform starFrame = FindChildRecursive(transform, "Star");
+        if (starFrame != null)
+        {
+            starFrame.gameObject.SetActive(true);
+        }
+    }
+
+    private bool HasConfiguredStarBrightObjects()
+    {
+        if (starBrightObjects == null || starBrightObjects.Length < LevelCount * StarsPerLevel)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < LevelCount * StarsPerLevel; i++)
+        {
+            if (starBrightObjects[i] == null)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static Transform FindChildRecursive(Transform parent, string childName)
+    {
+        if (parent == null)
+        {
+            return null;
+        }
+
+        if (parent.name == childName)
+        {
+            return parent;
+        }
+
+        for (int i = 0; i < parent.childCount; i++)
+        {
+            Transform child = parent.GetChild(i);
+            if (child.name == childName)
+            {
+                return child;
+            }
+
+            Transform nested = FindChildRecursive(child, childName);
+            if (nested != null)
+            {
+                return nested;
+            }
+        }
+
+        return null;
     }
 
     private void BindLevelItems()
@@ -139,15 +385,20 @@ public class LevelAchievementView : MonoBehaviour
     [ContextMenu("Validate References")]
     private void ValidateReferences()
     {
+        ResolveReferences();
+        EnsureStarBrightBindings();
+
         if (panelRoot == null || closeButton == null)
         {
             Debug.LogError("[LevelAchievementView] 引用未配齐，请拖入 panelRoot 与 closeButton。", this);
             return;
         }
 
-        if (levelItems == null || levelItems.Length == 0)
+        if (!HasConfiguredStarBrightObjects() && (levelItems == null || levelItems.Length == 0))
         {
-            Debug.LogWarning("[LevelAchievementView] 未配置 levelItems，请拖入至少一行关卡条目。", this);
+            Debug.LogWarning(
+                "[LevelAchievementView] 未配置 starBrightObjects 或 levelItems，星数/列表将无法刷新。",
+                this);
         }
     }
 #endif
