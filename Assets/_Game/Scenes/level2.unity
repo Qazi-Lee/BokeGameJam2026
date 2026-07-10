@@ -1478,6 +1478,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attachRadius: 1
+  hintRoot: {fileID: 0}
+  hintSprite: {fileID: 0}
+  hintOffset: {x: 0, y: 1.5, z: 0}
+  enableHintBreath: 1
+  breathScaleMultiplier: 1.12
+  breathDuration: 0.6
   drawGizmo: 1
   gizmoColor: {r: 0.2, g: 0.9, b: 0.3, a: 0.9}
 --- !u!212 &519931084
@@ -2196,6 +2202,7 @@ GameObject:
   - component: {fileID: 867484798}
   - component: {fileID: 867484800}
   - component: {fileID: 867484799}
+  - component: {fileID: 867484801}
   m_Layer: 0
   m_Name: ExitDoor
   m_TagString: Untagged
@@ -2282,6 +2289,51 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!61 &867484801
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 867484797}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 1, y: 1}
+    newSize: {x: 1, y: 1}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1}
+  m_EdgeRadius: 0
 --- !u!1001 &873920158
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8633,7 +8685,7 @@ Transform:
   m_GameObject: {fileID: 1407954012}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.34872878, y: 0.49768, z: -10}
+  m_LocalPosition: {x: 0.35144722, y: 0.49763995, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -10209,6 +10261,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39d16c6ab61e71b409ad1387915449f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  audioDatabase: {fileID: 0}
+  sceneBgmConfig: {fileID: 0}
+  levelDatabase: {fileID: 0}
+  gameOverMusicLoop: 1
 --- !u!82 &1907219637
 AudioSource:
   m_ObjectHideFlags: 0

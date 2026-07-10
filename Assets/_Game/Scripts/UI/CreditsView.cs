@@ -36,7 +36,7 @@ public class CreditsView : MonoBehaviour
     {
         if (closeButton != null)
         {
-            closeButton.onClick.AddListener(Hide);
+            closeButton.onClick.AddListener(OnCloseClicked);
         }
 
         Hide();
@@ -66,6 +66,12 @@ public class CreditsView : MonoBehaviour
         {
             panelRoot.SetActive(false);
         }
+    }
+
+    private void OnCloseClicked()
+    {
+        AudioManager.Instance?.PlayButtonClick();
+        Hide();
     }
 
     private void ResetScrollPosition()

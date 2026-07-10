@@ -10,6 +10,7 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
 {
     [Header("配置")]
     [SerializeField] private LevelDatabaseSO levelDatabase;
+    [SerializeField] private SceneBgmConfigSO sceneBgmConfig;
 
     [Header("组件")]
     [SerializeField] private SceneTransitionUI transitionUI;
@@ -41,6 +42,19 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         if (database != null)
         {
             levelDatabase = database;
+        }
+    }
+
+    public void SetSceneBgmConfig(SceneBgmConfigSO config)
+    {
+        if (config != null)
+        {
+            sceneBgmConfig = config;
+        }
+
+        if (AudioManager.Instance != null && config != null)
+        {
+            AudioManager.Instance.SetSceneBgmConfig(config);
         }
     }
 
@@ -260,6 +274,11 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         }
 
         isLoading = false;
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayMusicForScene(SceneManager.GetActiveScene().name);
+        }
     }
 
     private void EnsureTransitionUI()

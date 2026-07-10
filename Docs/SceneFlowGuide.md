@@ -357,3 +357,5 @@ _Game/
 │       └── ExitDoor.cs
 └── Scenes/
 ```
+
+场景加载完成后 `SceneFlowManager.FinishLoad` 会触发 BGM 切换，详见 [AudioSystemGuide.md](AudioSystemGuide.md)。

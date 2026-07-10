@@ -13,6 +13,8 @@ public class MainMenuController : MonoBehaviour
 {
     [Header("配置")]
     [SerializeField] private LevelDatabaseSO levelDatabase;
+    [SerializeField] private SceneBgmConfigSO sceneBgmConfig;
+    [SerializeField] private AudioDatabaseSO audioDatabase;
 
     [Header("主菜单")]
     [SerializeField] private MainMenuView menuView;
@@ -26,10 +28,13 @@ public class MainMenuController : MonoBehaviour
     private void Awake()
     {
         EnsureLevelDatabase();
+        EnsureSceneBgmConfig();
+        EnsureAudioDatabase();
         EnsureEventSystem();
         EnsureManagers();
         BindViews();
         RefreshContinueButton();
+        AudioManager.Instance?.PlayMusicForActiveScene();
     }
 
     private void OnEnable()
@@ -307,16 +312,129 @@ public class MainMenuController : MonoBehaviour
             sceneFlowManager = flowObject.AddComponent<SceneFlowManager>();
         }
 
+        AudioManager audioManager = AudioManager.Instance ?? FindObjectOfType<AudioManager>();
+        if (audioManager == null)
+        {
+            GameObject audioObject = new GameObject("AudioManager");
+            audioManager = audioObject.AddComponent<AudioManager>();
+        }
+
         if (levelDatabase != null)
         {
             saveManager.SetLevelDatabase(levelDatabase);
             sceneFlowManager.SetLevelDatabase(levelDatabase);
+            audioManager.SetLevelDatabase(levelDatabase);
+        }
+
+        if (sceneBgmConfig != null)
+        {
+            sceneFlowManager.SetSceneBgmConfig(sceneBgmConfig);
+            audioManager.SetSceneBgmConfig(sceneBgmConfig);
+        }
+
+        if (audioDatabase != null)
+        {
+            audioManager.SetAudioDatabase(audioDatabase);
         }
 
 #if UNITY_EDITOR
         AssignDatabaseIfMissing(saveManager);
         AssignDatabaseIfMissing(sceneFlowManager);
+        AssignSceneBgmConfigIfMissing(sceneFlowManager);
+        AssignSceneBgmConfigIfMissing(audioManager);
+        AssignAudioDatabaseIfMissing(audioManager);
+        AssignLevelDatabaseIfMissing(audioManager);
 #endif
+    }
+
+    private void EnsureAudioDatabase()
+    {
+        if (audioDatabase != null)
+        {
+            return;
+        }
+
+#if UNITY_EDITOR
+        audioDatabase = AssetDatabase.LoadAssetAtPath<AudioDatabaseSO>(
+            "Assets/_Game/Data/ScriptableObjects/AudioDatabase.asset");
+#endif
+    }
+
+    private void AssignAudioDatabaseIfMissing(AudioManager audioManager)
+    {
+        if (audioManager == null || audioDatabase == null)
+        {
+            return;
+        }
+
+        SerializedObject serializedObject = new SerializedObject(audioManager);
+        SerializedProperty property = serializedObject.FindProperty("audioDatabase");
+        if (property != null && property.objectReferenceValue == null)
+        {
+            property.objectReferenceValue = audioDatabase;
+            serializedObject.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        audioManager.SetAudioDatabase(audioDatabase);
+    }
+
+    private void AssignLevelDatabaseIfMissing(AudioManager audioManager)
+    {
+        if (audioManager == null || levelDatabase == null)
+        {
+            return;
+        }
+
+        SerializedObject serializedObject = new SerializedObject(audioManager);
+        SerializedProperty property = serializedObject.FindProperty("levelDatabase");
+        if (property != null && property.objectReferenceValue == null)
+        {
+            property.objectReferenceValue = levelDatabase;
+            serializedObject.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        audioManager.SetLevelDatabase(levelDatabase);
+    }
+
+    private void EnsureSceneBgmConfig()
+    {
+        if (sceneBgmConfig != null)
+        {
+            return;
+        }
+
+#if UNITY_EDITOR
+        sceneBgmConfig = AssetDatabase.LoadAssetAtPath<SceneBgmConfigSO>(
+            "Assets/_Game/Data/ScriptableObjects/SceneBgmConfig.asset");
+#endif
+    }
+
+    private void AssignSceneBgmConfigIfMissing(MonoBehaviour manager)
+    {
+        if (manager == null || sceneBgmConfig == null)
+        {
+            return;
+        }
+
+        if (manager is SceneFlowManager sceneFlowManager)
+        {
+            sceneFlowManager.SetSceneBgmConfig(sceneBgmConfig);
+            return;
+        }
+
+        if (manager is AudioManager audioManager)
+        {
+            audioManager.SetSceneBgmConfig(sceneBgmConfig);
+            return;
+        }
+
+        SerializedObject serializedObject = new SerializedObject(manager);
+        SerializedProperty property = serializedObject.FindProperty("sceneBgmConfig");
+        if (property != null && property.objectReferenceValue == null)
+        {
+            property.objectReferenceValue = sceneBgmConfig;
+            serializedObject.ApplyModifiedPropertiesWithoutUndo();
+        }
     }
 
     private void EnsureLevelDatabase()

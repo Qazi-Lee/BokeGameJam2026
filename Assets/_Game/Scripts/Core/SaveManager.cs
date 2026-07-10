@@ -181,6 +181,66 @@ public class SaveManager : BaseMonoManager<SaveManager>, ILevelStarProvider
     /// <summary>关卡总数（来自 LevelDatabase）。</summary>
     public int LevelCount => levelDatabase != null ? levelDatabase.LevelCount : GameConstants.LevelCount;
 
+    /// <summary>读取指定关卡的 BGM 音量（0~1）。</summary>
+    public float GetLevelBgmVolume(int levelIndex)
+    {
+        EnsureLevelAudioData();
+        if (!IsValidLevelIndex(levelIndex))
+        {
+            return GameConstants.DefaultAudioVolume;
+        }
+
+        return currentData.levelBgmVolumes[levelIndex];
+    }
+
+    /// <summary>读取指定关卡的 SFX 音量（0~1）。</summary>
+    public float GetLevelSfxVolume(int levelIndex)
+    {
+        EnsureLevelAudioData();
+        if (!IsValidLevelIndex(levelIndex))
+        {
+            return GameConstants.DefaultAudioVolume;
+        }
+
+        return currentData.levelSfxVolumes[levelIndex];
+    }
+
+    /// <summary>设置指定关卡的 BGM 音量并写入存档。</summary>
+    public void SetLevelBgmVolume(int levelIndex, float volume)
+    {
+        EnsureLevelAudioData();
+        if (!IsValidLevelIndex(levelIndex))
+        {
+            return;
+        }
+
+        currentData.levelBgmVolumes[levelIndex] = Mathf.Clamp01(volume);
+        WriteToDisk();
+
+        if (logSaveOperations)
+        {
+            Debug.Log($"[SaveManager] 关卡 {levelIndex} BGM 音量：{currentData.levelBgmVolumes[levelIndex]:P0}");
+        }
+    }
+
+    /// <summary>设置指定关卡的 SFX 音量并写入存档。</summary>
+    public void SetLevelSfxVolume(int levelIndex, float volume)
+    {
+        EnsureLevelAudioData();
+        if (!IsValidLevelIndex(levelIndex))
+        {
+            return;
+        }
+
+        currentData.levelSfxVolumes[levelIndex] = Mathf.Clamp01(volume);
+        WriteToDisk();
+
+        if (logSaveOperations)
+        {
+            Debug.Log($"[SaveManager] 关卡 {levelIndex} SFX 音量：{currentData.levelSfxVolumes[levelIndex]:P0}");
+        }
+    }
+
     // --- 星级扩展占位（ILevelStarProvider，扩展 Phase 再实现） ---
 
     /// <inheritdoc />
@@ -253,6 +313,21 @@ public class SaveManager : BaseMonoManager<SaveManager>, ILevelStarProvider
         currentData.completedLevelIndices = completed.ToArray();
     }
 
+    private void EnsureLevelAudioData()
+    {
+        if (currentData == null)
+        {
+            currentData = SaveData.CreateEmpty();
+        }
+
+        currentData.EnsureLevelAudioCapacity(LevelCount);
+    }
+
+    private bool IsValidLevelIndex(int levelIndex)
+    {
+        return levelIndex >= 0 && levelIndex < LevelCount;
+    }
+
     private void LoadFromDisk()
     {
         if (!File.Exists(SaveFilePath))
@@ -271,6 +346,8 @@ public class SaveManager : BaseMonoManager<SaveManager>, ILevelStarProvider
             {
                 currentData.completedLevelIndices = Array.Empty<int>();
             }
+
+            EnsureLevelAudioData();
         }
         catch (Exception exception)
         {

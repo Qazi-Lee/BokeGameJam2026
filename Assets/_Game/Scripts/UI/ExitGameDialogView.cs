@@ -59,11 +59,13 @@ public class ExitGameDialogView : MonoBehaviour
 
     private void OnConfirmClicked()
     {
+        AudioManager.Instance?.PlayButtonClick();
         QuitApplication();
     }
 
     private void OnCancelClicked()
     {
+        AudioManager.Instance?.PlayButtonClick();
         Hide();
     }
 

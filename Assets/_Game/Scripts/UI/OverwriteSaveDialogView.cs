@@ -90,6 +90,7 @@ public class OverwriteSaveDialogView : MonoBehaviour
 
     private void OnConfirmClicked()
     {
+        AudioManager.Instance?.PlayButtonClick();
         if (isNewGameRequest)
         {
             OnNewGameConfirmed?.Invoke();
@@ -104,6 +105,7 @@ public class OverwriteSaveDialogView : MonoBehaviour
 
     private void OnCancelClicked()
     {
+        AudioManager.Instance?.PlayButtonClick();
         OnCanceled?.Invoke();
         Hide();
     }

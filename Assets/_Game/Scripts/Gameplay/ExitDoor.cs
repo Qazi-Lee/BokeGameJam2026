@@ -52,6 +52,11 @@ public class ExitDoor : MonoBehaviour
 
         triggered = true;
 
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySfx(GameConstants.AudioNames.LevelClear);
+        }
+
         if (SaveManager.Instance != null)
         {
             SaveManager.Instance.OnLevelCleared(SceneFlowManager.Instance.CurrentLevelIndex);

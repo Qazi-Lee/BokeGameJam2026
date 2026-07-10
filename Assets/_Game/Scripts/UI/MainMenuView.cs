@@ -95,6 +95,10 @@ public class MainMenuView : MonoBehaviour
         }
 
         button.onClick.RemoveAllListeners();
-        button.onClick.AddListener(() => handler());
+        button.onClick.AddListener(() =>
+        {
+            AudioManager.Instance?.PlayButtonClick();
+            handler();
+        });
     }
 }

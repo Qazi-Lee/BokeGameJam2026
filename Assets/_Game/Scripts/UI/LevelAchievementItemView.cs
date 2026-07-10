@@ -115,6 +115,7 @@ public class LevelAchievementItemView : MonoBehaviour
             return;
         }
 
+        AudioManager.Instance?.PlayButtonClick();
         OnEnterRequested?.Invoke(levelIndex);
     }
 

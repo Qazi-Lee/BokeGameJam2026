@@ -28,7 +28,7 @@ public class LevelAchievementView : MonoBehaviour
     {
         if (closeButton != null)
         {
-            closeButton.onClick.AddListener(Hide);
+            closeButton.onClick.AddListener(OnCloseClicked);
         }
 
         if (resetProgressButton != null)
@@ -58,6 +58,12 @@ public class LevelAchievementView : MonoBehaviour
         {
             panelRoot.SetActive(false);
         }
+    }
+
+    private void OnCloseClicked()
+    {
+        AudioManager.Instance?.PlayButtonClick();
+        Hide();
     }
 
     /// <summary>根据存档与关卡表刷新各行状态。</summary>
