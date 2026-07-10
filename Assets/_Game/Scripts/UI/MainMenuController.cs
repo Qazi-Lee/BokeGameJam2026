@@ -241,22 +241,22 @@ public class MainMenuController : MonoBehaviour
     {
         if (overwriteDialogView == null)
         {
-            overwriteDialogView = FindObjectOfType<OverwriteSaveDialogView>();
+            overwriteDialogView = FindObjectOfType<OverwriteSaveDialogView>(true);
         }
 
         if (exitGameDialogView == null)
         {
-            exitGameDialogView = FindObjectOfType<ExitGameDialogView>();
+            exitGameDialogView = FindObjectOfType<ExitGameDialogView>(true);
         }
 
         if (levelAchievementView == null)
         {
-            levelAchievementView = FindObjectOfType<LevelAchievementView>();
+            levelAchievementView = FindObjectOfType<LevelAchievementView>(true);
         }
 
         if (creditsView == null)
         {
-            creditsView = FindObjectOfType<CreditsView>();
+            creditsView = FindObjectOfType<CreditsView>(true);
         }
     }
 

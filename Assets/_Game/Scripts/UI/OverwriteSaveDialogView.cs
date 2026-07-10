@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,9 +12,9 @@ public class OverwriteSaveDialogView : MonoBehaviour
     [SerializeField] private GameObject panelRoot;
 
     [Header("文案")]
-    [SerializeField] private Text dynamicLineText;
-    [SerializeField] private Text fixedLineText;
-    [SerializeField] private string fixedLineDefault = "会覆盖当前存档，是否确认？";
+    [SerializeField] private TMP_Text messageText;
+    [SerializeField] private string newGameMessage = "开启新游戏\n会覆盖当前存档，是否确认？";
+    [SerializeField] private string levelSelectMessage = "进入指定关卡\n会覆盖当前存档，是否确认？";
 
     [Header("按钮")]
     [SerializeField] private Button confirmButton;
@@ -42,8 +43,6 @@ public class OverwriteSaveDialogView : MonoBehaviour
         {
             cancelButton.onClick.AddListener(OnCancelClicked);
         }
-
-        Hide();
     }
 
     /// <summary>新游戏触发的覆盖确认。</summary>
@@ -51,7 +50,7 @@ public class OverwriteSaveDialogView : MonoBehaviour
     {
         isNewGameRequest = true;
         targetLevelIndex = 0;
-        ShowInternal("开启新游戏，");
+        ShowInternal(newGameMessage);
     }
 
     /// <summary>关卡选择触发的覆盖确认。</summary>
@@ -59,7 +58,7 @@ public class OverwriteSaveDialogView : MonoBehaviour
     {
         isNewGameRequest = false;
         targetLevelIndex = levelIndex;
-        ShowInternal("如进入指定关卡，");
+        ShowInternal(levelSelectMessage);
     }
 
     public void Hide()
@@ -70,16 +69,11 @@ public class OverwriteSaveDialogView : MonoBehaviour
         }
     }
 
-    private void ShowInternal(string dynamicLine)
+    private void ShowInternal(string message)
     {
-        if (dynamicLineText != null)
+        if (messageText != null)
         {
-            dynamicLineText.text = dynamicLine;
-        }
-
-        if (fixedLineText != null)
-        {
-            fixedLineText.text = fixedLineDefault;
+            messageText.text = message;
         }
 
         if (panelRoot != null)
@@ -114,7 +108,7 @@ public class OverwriteSaveDialogView : MonoBehaviour
     [ContextMenu("Validate References")]
     private void ValidateReferences()
     {
-        if (panelRoot == null || dynamicLineText == null || confirmButton == null || cancelButton == null)
+        if (panelRoot == null || messageText == null || confirmButton == null || cancelButton == null)
         {
             Debug.LogError("[OverwriteSaveDialogView] 引用未配齐，请拖入 panelRoot、文案与按钮。", this);
         }
