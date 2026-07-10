@@ -582,6 +582,9 @@ MonoBehaviour:
   sceneBgmConfig: {fileID: 11400000, guid: f7022345678901abcdef012345678902, type: 2}
   transitionUI: {fileID: 0}
   narrativeIntro: {fileID: 0}
+  outcomePanels: {fileID: 0}
+  topBarPrefab: {fileID: 0}
+  topBarCanvasSortOrder: 40
 --- !u!4 &1587238563
 Transform:
   m_ObjectHideFlags: 0

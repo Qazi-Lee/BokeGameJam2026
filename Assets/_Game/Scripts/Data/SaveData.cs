@@ -22,6 +22,9 @@ public class SaveData
     /// <summary>各关 SFX 音量（索引 = 关卡索引），缺省 1。</summary>
     public float[] levelSfxVolumes;
 
+    /// <summary>各关是否静音（索引 = 关卡索引），缺省 false（有声音）。</summary>
+    public bool[] levelMuted;
+
     /// <summary>创建新游戏存档。</summary>
     public static SaveData CreateNewGame()
     {
@@ -53,11 +56,31 @@ public class SaveData
         {
             levelBgmVolumes = Array.Empty<float>();
             levelSfxVolumes = Array.Empty<float>();
+            levelMuted = Array.Empty<bool>();
             return;
         }
 
         levelBgmVolumes = EnsureVolumeArray(levelBgmVolumes, levelCount);
         levelSfxVolumes = EnsureVolumeArray(levelSfxVolumes, levelCount);
+        levelMuted = EnsureMuteArray(levelMuted, levelCount);
+    }
+
+    private static bool[] EnsureMuteArray(bool[] existing, int levelCount)
+    {
+        bool[] result = new bool[levelCount];
+        for (int i = 0; i < levelCount; i++)
+        {
+            if (existing != null && i < existing.Length)
+            {
+                result[i] = existing[i];
+            }
+            else
+            {
+                result[i] = false;
+            }
+        }
+
+        return result;
     }
 
     private static float[] EnsureVolumeArray(float[] existing, int levelCount)

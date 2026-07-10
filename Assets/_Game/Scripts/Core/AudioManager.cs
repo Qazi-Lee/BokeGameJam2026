@@ -55,6 +55,7 @@ public class AudioManager : BaseMonoManager<AudioManager>
     private float musicVolume = GameConstants.DefaultAudioVolume;
     private float sfxVolume = GameConstants.DefaultAudioVolume;
     private int currentVolumeLevelIndex = -1;
+    private bool isMuted;
 
     /// <summary>当前音量绑定的关卡索引；-1 表示非关卡场景（如主菜单）。</summary>
     public int CurrentVolumeLevelIndex => currentVolumeLevelIndex;
@@ -62,6 +63,9 @@ public class AudioManager : BaseMonoManager<AudioManager>
     public float MusicVolume => musicVolume;
 
     public float SfxVolume => sfxVolume;
+
+    /// <summary>当前关卡是否处于静音（写入存档，每关独立）。</summary>
+    public bool IsMuted => isMuted;
 
     protected override bool PersistAcrossScenes => true;
 
@@ -207,7 +211,31 @@ public class AudioManager : BaseMonoManager<AudioManager>
             return;
         }
 
-        sfxSource.PlayOneShot(clip, sfxVolume * volumeScale);
+        sfxSource.PlayOneShot(clip, GetEffectiveSfxVolume(volumeScale));
+    }
+
+    /// <summary>切换当前关卡静音状态（写入存档）。</summary>
+    public void ToggleMuted()
+    {
+        SetMuted(!isMuted);
+    }
+
+    /// <summary>设置当前关卡静音状态（写入存档，每关独立）。</summary>
+    public void SetMuted(bool muted)
+    {
+        if (isMuted == muted)
+        {
+            return;
+        }
+
+        isMuted = muted;
+
+        if (currentVolumeLevelIndex >= 0 && SaveManager.Instance != null)
+        {
+            SaveManager.Instance.SetLevelMuted(currentVolumeLevelIndex, muted);
+        }
+
+        ApplyMuteOutput();
     }
 
     /// <summary>兼容旧调用，等同于 PlaySfx。</summary>
@@ -223,13 +251,13 @@ public class AudioManager : BaseMonoManager<AudioManager>
             return;
         }
 
-        sfxSource.PlayOneShot(audioClip, sfxVolume * volume);
+        sfxSource.PlayOneShot(audioClip, GetEffectiveSfxVolume(volume));
     }
 
     public void SetMusicVolume(float volume)
     {
         musicVolume = Mathf.Clamp01(volume);
-        if (bgmSource != null)
+        if (!isMuted && bgmSource != null)
         {
             bgmSource.volume = musicVolume;
         }
@@ -255,7 +283,7 @@ public class AudioManager : BaseMonoManager<AudioManager>
         if (currentVolumeLevelIndex == levelIndex)
         {
             musicVolume = clamped;
-            if (bgmSource != null)
+            if (!isMuted && bgmSource != null)
             {
                 bgmSource.volume = musicVolume;
             }
@@ -284,7 +312,7 @@ public class AudioManager : BaseMonoManager<AudioManager>
             && bgmSource != null
             && bgmSource.isPlaying)
         {
-            bgmSource.volume = musicVolume;
+            bgmSource.volume = isMuted ? 0f : musicVolume;
             return;
         }
 
@@ -301,8 +329,26 @@ public class AudioManager : BaseMonoManager<AudioManager>
 
         bgmSource.loop = loop;
         bgmSource.clip = clip;
-        bgmSource.volume = musicVolume;
+        bgmSource.volume = isMuted ? 0f : musicVolume;
         bgmSource.Play();
+    }
+
+    private float GetEffectiveSfxVolume(float volumeScale = 1f)
+    {
+        if (isMuted)
+        {
+            return 0f;
+        }
+
+        return sfxVolume * volumeScale;
+    }
+
+    private void ApplyMuteOutput()
+    {
+        if (bgmSource != null)
+        {
+            bgmSource.volume = isMuted ? 0f : musicVolume;
+        }
     }
 
     private AudioClip GetAudioClip(string audioName)
@@ -319,17 +365,16 @@ public class AudioManager : BaseMonoManager<AudioManager>
         {
             musicVolume = SaveManager.Instance.GetLevelBgmVolume(levelIndex);
             sfxVolume = SaveManager.Instance.GetLevelSfxVolume(levelIndex);
+            isMuted = SaveManager.Instance.GetLevelMuted(levelIndex);
         }
         else
         {
             musicVolume = GameConstants.DefaultAudioVolume;
             sfxVolume = GameConstants.DefaultAudioVolume;
+            isMuted = false;
         }
 
-        if (bgmSource != null)
-        {
-            bgmSource.volume = musicVolume;
-        }
+        ApplyMuteOutput();
     }
 
     private int ResolveLevelIndex(string sceneName)

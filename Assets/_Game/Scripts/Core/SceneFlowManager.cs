@@ -1,6 +1,11 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 /// <summary>
 /// 场景切换核心管理器：统一入口、异步加载、配合 SceneTransitionUI 播放转场。
@@ -8,6 +13,8 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
 {
+    private const string DefaultTopBarPrefabPath = "Assets/_Game/Prefabs/UI/PanelsSum/TopBar.prefab";
+
     [Header("配置")]
     [SerializeField] private LevelDatabaseSO levelDatabase;
     [SerializeField] private SceneBgmConfigSO sceneBgmConfig;
@@ -17,7 +24,11 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
     [SerializeField] private NarrativeIntroController narrativeIntro;
     [SerializeField] private OutcomePanelController outcomePanels;
 
+    [Header("关卡顶部栏（仅关卡场景显示）")]
+    [SerializeField] private GameObject topBarPrefab;
+
     private bool isLoading;
+    private TopBarController topBar;
 
     protected override bool PersistAcrossScenes => true;
 
@@ -26,6 +37,8 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
     public NarrativeIntroController NarrativeIntro => narrativeIntro;
 
     public OutcomePanelController OutcomePanels => outcomePanels;
+
+    public TopBarController TopBar => topBar;
 
     public string CurrentSceneName => SceneManager.GetActiveScene().name;
 
@@ -39,9 +52,13 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
     protected override void Awake()
     {
         base.Awake();
+#if UNITY_EDITOR
+        EnsureTopBarPrefabReference();
+#endif
         EnsureTransitionUI();
         EnsureNarrativeIntro();
         EnsureOutcomePanels();
+        SyncTopBarVisibility();
     }
 
     /// <summary>显示胜利面板，玩家点击继续后加载下一关（或最后一关回主菜单）。</summary>
@@ -197,6 +214,7 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         EnsureNarrativeIntro();
         EnsureOutcomePanels();
         outcomePanels?.HideAll();
+        topBar?.SetVisible(false);
 
         Debug.Log(
             $"[SceneFlowManager] 开始加载：{CurrentSceneName} -> {request.TargetSceneName} " +
@@ -323,6 +341,52 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         {
             AudioManager.Instance.PlayMusicForScene(SceneManager.GetActiveScene().name);
         }
+
+        SyncTopBarVisibility();
+    }
+
+    /// <summary>关卡场景显示 TopBar，主界面与其它非关卡场景隐藏。</summary>
+    private void SyncTopBarVisibility()
+    {
+        bool inLevel = CurrentLevelIndex >= 0;
+        if (!inLevel)
+        {
+            topBar?.SetVisible(false);
+            return;
+        }
+
+        EnsureTopBar();
+        topBar?.SetVisible(true);
+    }
+
+    private void EnsureTopBar()
+    {
+#if UNITY_EDITOR
+        EnsureTopBarPrefabReference();
+#endif
+        if (topBar != null)
+        {
+            return;
+        }
+
+        if (topBarPrefab == null)
+        {
+            Debug.LogWarning("[SceneFlowManager] 未配置 TopBar 预制体，关卡顶部栏不可用。");
+            return;
+        }
+
+        GameObject instance = Instantiate(topBarPrefab, transform);
+        instance.name = topBarPrefab.name;
+
+        topBar = instance.GetComponent<TopBarController>();
+        if (topBar == null)
+        {
+            Debug.LogWarning("[SceneFlowManager] TopBar 预制体缺少 TopBarController，请在预制体上挂载。");
+            Destroy(instance);
+            return;
+        }
+
+        topBar.SetVisible(false);
     }
 
     private void EnsureTransitionUI()
@@ -374,6 +438,18 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         Debug.LogError("[SceneFlowManager] 未配置 LevelDatabaseSO，请在 Inspector 中指定。");
         return false;
     }
+
+#if UNITY_EDITOR
+    private void EnsureTopBarPrefabReference()
+    {
+        if (topBarPrefab != null)
+        {
+            return;
+        }
+
+        topBarPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(DefaultTopBarPrefabPath);
+    }
+#endif
 
     private struct SceneLoadRequest
     {

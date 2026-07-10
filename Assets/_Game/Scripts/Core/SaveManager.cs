@@ -241,6 +241,41 @@ public class SaveManager : BaseMonoManager<SaveManager>, ILevelStarProvider
         }
     }
 
+    /// <summary>读取指定关卡是否静音。</summary>
+    public bool GetLevelMuted(int levelIndex)
+    {
+        EnsureLevelAudioData();
+        if (!IsValidLevelIndex(levelIndex))
+        {
+            return false;
+        }
+
+        return currentData.levelMuted[levelIndex];
+    }
+
+    /// <summary>设置指定关卡静音状态并写入存档。</summary>
+    public void SetLevelMuted(int levelIndex, bool muted)
+    {
+        EnsureLevelAudioData();
+        if (!IsValidLevelIndex(levelIndex))
+        {
+            return;
+        }
+
+        if (currentData.levelMuted[levelIndex] == muted)
+        {
+            return;
+        }
+
+        currentData.levelMuted[levelIndex] = muted;
+        WriteToDisk();
+
+        if (logSaveOperations)
+        {
+            Debug.Log($"[SaveManager] 关卡 {levelIndex} 静音：{muted}");
+        }
+    }
+
     // --- 星级扩展占位（ILevelStarProvider，扩展 Phase 再实现） ---
 
     /// <inheritdoc />
