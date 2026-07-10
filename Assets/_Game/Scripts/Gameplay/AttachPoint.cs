@@ -22,6 +22,7 @@ public class AttachPoint : MonoBehaviour
     [SerializeField] private Transform hintRoot;
     [SerializeField] private Sprite hintSprite;
     [SerializeField] private Vector3 hintOffset = new Vector3(0f, 1.5f, 0f);
+    [SerializeField] private GameObject attachEffectPrefab;
 
     [Header("Hint Animation")]
     [SerializeField] private bool enableHintBreath = true;
@@ -127,6 +128,7 @@ public class AttachPoint : MonoBehaviour
     public void AttachPlayer(PlayerBody playerBody)
     {
         attachedPlayer = playerBody;
+        PlayAttachEffect();
     }
 
     public void DetachPlayer(PlayerBody playerBody)
@@ -239,6 +241,17 @@ public class AttachPoint : MonoBehaviour
         {
             renderer.sprite = hintSprite;
         }
+    }
+
+    private void PlayAttachEffect()
+    {
+        if (attachEffectPrefab == null)
+        {
+            return;
+        }
+
+        GameObject effectInstance = Instantiate(attachEffectPrefab, transform.position, attachEffectPrefab.transform.rotation);
+        Destroy(effectInstance, 1f);
     }
 
     private void SetHintVisible(bool visible)
