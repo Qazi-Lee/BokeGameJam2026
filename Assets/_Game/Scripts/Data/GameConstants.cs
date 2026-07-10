@@ -12,18 +12,22 @@ public static class GameConstants
         public const string GameOver = "GameOver";
     }
 
+    /// <summary>本地存档文件名，完整路径见 SaveManager.SaveFilePath。</summary>
+    public const string SaveFileName = "save.json";
+
+    /// <summary>关卡总数，与 LevelDatabase.asset 中 levels 数量一致。</summary>
+    public const int LevelCount = 4;
+
     /// <summary>
-    /// 场景名称占位常量。后续在 Build Settings 中注册真实场景后与此处保持一致。
+    /// 场景名称常量，格式为 level + 序号。
+    /// 须与 Build Settings 中场景文件名（不含 .unity）完全一致。
     /// </summary>
     public static class SceneNames
     {
         public const string MainMenu = "MainMenu";
-        public const string Level01 = "Level_01";
-        public const string Level02 = "Level_02";
-        public const string Level03 = "Level_03";
-        public const string Level04 = "Level_04";
-
-        /// <summary>当前开发用示例场景，与 SampleScene.unity 对应。</summary>
-        public const string SampleScene = "SampleScene";
+        public const string Level1 = "level1";
+        public const string Level2 = "level2";
+        public const string Level3 = "level3";
+        public const string Level4 = "level4";
     }
 }

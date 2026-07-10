@@ -58,7 +58,11 @@ _Game/
 ├── Prefabs/                  预制体
 │
 ├── Scenes/                   游戏场景
-│   └── SampleScene.unity
+│   ├── MainMenu.unity        # 主界面（Build Index 0）
+│   ├── level1.unity          # 第 1 关
+│   ├── level2.unity          # 第 2 关
+│   ├── level3.unity          # 第 3 关
+│   └── level4.unity          # 第 4 关
 │
 └── Scripts/                  C# 脚本
     ├── Core/                 框架与全局系统（Manager、单例基类）
@@ -153,7 +157,7 @@ Settings/
 1. **移动资源请在 Unity Editor 内进行**（拖拽），以保留 `.meta` GUID，避免引用丢失
 2. **不要移动 `AmplifyShaderEditor/`**，插件内部有硬编码路径
 3. **`Resources/` 不要滥用**：所有资源都放进去会导致打包体积增大、加载变慢；项目变大后考虑迁移到 Addressables
-4. **Build Settings 场景路径**：当前为 `Assets/_Game/Scenes/SampleScene.unity`
+4. **Build Settings 场景路径**：`MainMenu`（Index 0）+ `level1` / `level2` / `level3` / `level4`
 
 ---
 

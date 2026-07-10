@@ -52,6 +52,11 @@ public class ExitDoor : MonoBehaviour
 
         triggered = true;
 
+        if (SaveManager.Instance != null)
+        {
+            SaveManager.Instance.OnLevelCleared(SceneFlowManager.Instance.CurrentLevelIndex);
+        }
+
         if (GameStateManager.Instance != null)
         {
             GameStateManager.Instance.EnterTransitioning();

@@ -16,6 +16,7 @@
 | 游戏状态 | `GameStateManager` | 冻结输入（Playing / GameOver / Transitioning） |
 | 触发器 | `ExitDoor` | 玩家触碰出口 → 加载下一关 |
 | UI 重试 | `GameOverUI` | 死亡后 Retry → 重载当前关 |
+| 存档 | `SaveManager` | 本地 `save.json`，关卡进度与解锁 |
 
 ### 加载流程
 
@@ -46,24 +47,25 @@ ResetToPlaying
    - **backgroundSprite / characterSprite**：过关转场用图（可选，留空则显示纯色占位）
 3. 设置 **mainMenuSceneName**：全部关卡通关后返回的主菜单场景名
 
-当前占位配置示例：
+当前配置示例：
 
 | 顺序 | sceneName | 说明 |
 |------|-----------|------|
-| 0 | SampleScene | 第 1 关 |
-| 1 | Level_01 | 第 2 关 |
-| 1 | Level_02 | 第 3 关 |
-| 2 | Level_03 | 第 4 关（最后一关） |
+| — | MainMenu | 主界面（非关卡列表项） |
+| 0 | level1 | 第 1 关 |
+| 1 | level2 | 第 2 关 |
+| 2 | level3 | 第 3 关 |
+| 3 | level4 | 第 4 关（最后一关） |
 | 通关后 | MainMenu | 主菜单 |
 
-> 场景名常量可参考 `GameConstants.SceneNames`，保持与 Build Settings 一致。
+> 场景名须与 `.unity` 文件名一致（不含扩展名）。常量见 `GameConstants.SceneNames`。
 
 ### 2. 注册 Build Settings
 
 **File → Build Settings** 中 Add Open Scenes，确保以下场景均已注册：
 
-- 所有关卡场景（如 `SampleScene`、`Level_01`、`Level_02`）
-- 主菜单场景（如 `MainMenu`）
+- 主菜单场景 `MainMenu`
+- 所有关卡场景：`level1`、`level2`、`level3`、`level4`
 
 未注册的场景调用 `LoadScene` 时会在 Console 报错，并自动恢复游戏（不会卡死）。
 
@@ -117,8 +119,8 @@ SceneFlowManager.Instance.LoadLevel(0);
 SceneFlowManager.Instance.LoadMainMenu();
 
 // 按场景名加载（可指定转场模式）
-SceneFlowManager.Instance.LoadScene("Level_01", TransitionMode.LevelComplete);
-SceneFlowManager.Instance.LoadScene("SampleScene", TransitionMode.SimpleFade);
+SceneFlowManager.Instance.LoadScene("level1", TransitionMode.LevelComplete);
+SceneFlowManager.Instance.LoadScene("MainMenu", TransitionMode.SimpleFade);
 ```
 
 调用前请确认 `SceneFlowManager.Instance != null`。
@@ -230,7 +232,7 @@ SceneFlowManager.Instance.LoadScene("SampleScene", TransitionMode.SimpleFade);
 
 场景名占位常量，代码中引用以避免拼写错误：
 
-- `MainMenu`、`Level01`（`Level_01`）、`Level02`、`Level03`、`SampleScene`
+- `MainMenu`、`level1`、`level2`、`level3`、`level4`
 
 ### ExitDoor
 
@@ -241,6 +243,8 @@ SceneFlowManager.Instance.LoadScene("SampleScene", TransitionMode.SimpleFade);
 1. 检查 `IsPlaying` 且未在加载
 2. `EnterTransitioning()`
 3. `LoadNextLevel()`
+
+`LoadNextLevel()` 行为：当前在**主菜单**时进入第一关（`level1`）；在关卡内时进入下一关，末关通关后回主菜单。
 
 内置 `triggered` 标志，防止同一次停留重复触发。
 
@@ -284,6 +288,7 @@ _Game/
 ├── Scripts/
 │   ├── Core/
 │   │   ├── SceneFlowManager.cs
+│   │   ├── SaveManager.cs
 │   │   ├── GameStateManager.cs
 │   │   ├── BaseMonoManager.cs
 │   │   ├── SceneFlowTest.cs          # 调试
