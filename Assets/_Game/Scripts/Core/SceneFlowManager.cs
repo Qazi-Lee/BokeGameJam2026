@@ -15,6 +15,7 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
     [Header("组件")]
     [SerializeField] private SceneTransitionUI transitionUI;
     [SerializeField] private NarrativeIntroController narrativeIntro;
+    [SerializeField] private OutcomePanelController outcomePanels;
 
     private bool isLoading;
 
@@ -23,6 +24,8 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
     public bool IsLoading => isLoading;
 
     public NarrativeIntroController NarrativeIntro => narrativeIntro;
+
+    public OutcomePanelController OutcomePanels => outcomePanels;
 
     public string CurrentSceneName => SceneManager.GetActiveScene().name;
 
@@ -38,6 +41,26 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         base.Awake();
         EnsureTransitionUI();
         EnsureNarrativeIntro();
+        EnsureOutcomePanels();
+    }
+
+    /// <summary>显示胜利面板，玩家点击继续后加载下一关（或最后一关回主菜单）。</summary>
+    public void StartVictoryFlow()
+    {
+        StartCoroutine(VictoryFlowRoutine());
+    }
+
+    private IEnumerator VictoryFlowRoutine()
+    {
+        EnsureOutcomePanels();
+
+        if (outcomePanels != null)
+        {
+            yield return outcomePanels.ShowVictoryAndWait(CurrentLevelIndex);
+            yield break;
+        }
+
+        LoadNextLevel();
     }
 
     public void SetLevelDatabase(LevelDatabaseSO database)
@@ -172,6 +195,8 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         isLoading = true;
         EnsureTransitionUI();
         EnsureNarrativeIntro();
+        EnsureOutcomePanels();
+        outcomePanels?.HideAll();
 
         Debug.Log(
             $"[SceneFlowManager] 开始加载：{CurrentSceneName} -> {request.TargetSceneName} " +
@@ -323,6 +348,19 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         if (narrativeIntro == null)
         {
             narrativeIntro = gameObject.AddComponent<NarrativeIntroController>();
+        }
+    }
+
+    private void EnsureOutcomePanels()
+    {
+        if (outcomePanels == null)
+        {
+            outcomePanels = GetComponent<OutcomePanelController>();
+        }
+
+        if (outcomePanels == null)
+        {
+            outcomePanels = gameObject.AddComponent<OutcomePanelController>();
         }
     }
 
