@@ -5,6 +5,7 @@ public static class GameConstants
         public const string Player = "Player";
         public const string Death = "Death";
         public const string AttachPoint = "AttachPoint";
+        public const string Obstacle = "Obstacle";
     }
 
     /// <summary>音量默认值，也用于主菜单等非关卡场景。</summary>

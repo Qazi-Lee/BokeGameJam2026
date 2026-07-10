@@ -38,6 +38,14 @@ public class ObstacleMover : MonoBehaviour
     private Vector3 commandStartPosition;
     private bool isPlaying;
 
+    private void Awake()
+    {
+        if (GetComponent<ObstacleHitReporter>() == null)
+        {
+            gameObject.AddComponent<ObstacleHitReporter>();
+        }
+    }
+
     private void Start()
     {
         startPosition = transform.position;

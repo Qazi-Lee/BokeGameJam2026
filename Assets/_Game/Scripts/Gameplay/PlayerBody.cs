@@ -32,6 +32,16 @@ public class PlayerBody : MonoBehaviour
         FollowAttachedPoint();
     }
 
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        ObstacleHitReporter.HandlePlayerContact(collision.collider);
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        ObstacleHitReporter.HandlePlayerContact(other);
+    }
+
     private void OnValidate()
     {
         if (body == null)

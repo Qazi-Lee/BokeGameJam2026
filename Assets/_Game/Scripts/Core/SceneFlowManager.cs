@@ -342,7 +342,18 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
             AudioManager.Instance.PlayMusicForScene(SceneManager.GetActiveScene().name);
         }
 
+        if (CurrentLevelIndex >= 0)
+        {
+            LevelStarTracker.EnsureInstance();
+            LevelStarTracker.Instance.ResetForLevel();
+        }
+
         SyncTopBarVisibility();
+
+        if (CurrentLevelIndex >= 0 && topBar != null && LevelStarTracker.Instance != null)
+        {
+            topBar.RefreshStars(LevelStarTracker.Instance.CurrentStars);
+        }
     }
 
     /// <summary>关卡场景显示 TopBar，主界面与其它非关卡场景隐藏。</summary>
