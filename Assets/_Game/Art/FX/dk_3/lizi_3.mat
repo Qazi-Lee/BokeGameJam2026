@@ -37,7 +37,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 4030d854c19b5a74e9f1115627431d5a, type: 3}
+        m_Texture: {fileID: 2800000, guid: c42c2dc4a4c7d0d439b0ee9ba3dacf20, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MaskTex:
@@ -61,13 +61,13 @@ Material:
     - _DistortAffectMaskDissolve: 0
     - _DistortIntensity: 0.05
     - _DistortOn: 0
-    - _DstBlend: 10
+    - _DstBlend: 1
     - _EnableExternalAlpha: 0
     - _MaskChannel: 3
     - _MaskInvert: 0
     - _MaskOn: 0
     - _Opacity: 1
-    - _SrcBlend: 5
+    - _SrcBlend: 1
     - _UseVertexColor: 1
     - _ZTest: 4
     - _ZWrite: 0
