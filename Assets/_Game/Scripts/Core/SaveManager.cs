@@ -276,29 +276,71 @@ public class SaveManager : BaseMonoManager<SaveManager>, ILevelStarProvider
         }
     }
 
-    // --- 星级扩展占位（ILevelStarProvider，扩展 Phase 再实现） ---
-
     /// <inheritdoc />
     public int GetStarCount(int levelIndex)
     {
-        return 0;
+        EnsureLevelSaveData();
+        if (!IsValidLevelIndex(levelIndex))
+        {
+            return 0;
+        }
+
+        return currentData.levelStars[levelIndex];
     }
 
     /// <inheritdoc />
+    /// <remarks>仅通关时调用；同关取历史较高星数，通关至少记 1 星。</remarks>
     public void SettleLevelStars(int levelIndex, int starCount)
     {
+        EnsureLevelSaveData();
+        if (!IsValidLevelIndex(levelIndex))
+        {
+            return;
+        }
+
+        int settledStars = ClampSettledStarCount(starCount);
+        int previousStars = currentData.levelStars[levelIndex];
+        int nextStars = Mathf.Max(previousStars, settledStars);
+
+        if (nextStars == previousStars)
+        {
+            return;
+        }
+
+        currentData.levelStars[levelIndex] = nextStars;
+        WriteToDisk();
+
         if (logSaveOperations)
         {
-            Debug.Log($"[SaveManager] SettleLevelStars 占位调用：关卡={levelIndex}，星数={starCount}（扩展 Phase 实现）");
+            Debug.Log($"[SaveManager] 关卡 {levelIndex} 星级结算：{previousStars} -> {nextStars}（本局 {settledStars} 星）");
         }
     }
 
     /// <inheritdoc />
     public void ResetAllStars()
     {
+        EnsureLevelSaveData();
+
+        bool changed = false;
+        for (int i = 0; i < currentData.levelStars.Length; i++)
+        {
+            if (currentData.levelStars[i] != 0)
+            {
+                currentData.levelStars[i] = 0;
+                changed = true;
+            }
+        }
+
+        if (!changed)
+        {
+            return;
+        }
+
+        WriteToDisk();
+
         if (logSaveOperations)
         {
-            Debug.Log("[SaveManager] ResetAllStars 占位调用（扩展 Phase 实现）");
+            Debug.Log("[SaveManager] 已清空所有关卡星级。");
         }
     }
 
@@ -350,12 +392,23 @@ public class SaveManager : BaseMonoManager<SaveManager>, ILevelStarProvider
 
     private void EnsureLevelAudioData()
     {
+        EnsureLevelSaveData();
+    }
+
+    private void EnsureLevelSaveData()
+    {
         if (currentData == null)
         {
             currentData = SaveData.CreateEmpty();
         }
 
-        currentData.EnsureLevelAudioCapacity(LevelCount);
+        currentData.EnsureLevelSaveCapacity(LevelCount);
+    }
+
+    private static int ClampSettledStarCount(int starCount)
+    {
+        int clamped = Mathf.Clamp(starCount, 0, LevelStarTracker.MaxStars);
+        return Mathf.Max(clamped, 1);
     }
 
     private bool IsValidLevelIndex(int levelIndex)

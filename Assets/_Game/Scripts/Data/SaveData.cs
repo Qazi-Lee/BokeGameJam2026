@@ -1,8 +1,7 @@
 using System;
 
 /// <summary>
-/// 本地单存档数据：关卡进度 + 每关独立 BGM/SFX 音量。
-/// 扩展 Phase 可在此增加 levelStars 等字段。
+/// 本地单存档数据：关卡进度 + 每关星级 + 每关独立 BGM/SFX 音量。
 /// </summary>
 [Serializable]
 public class SaveData
@@ -25,6 +24,9 @@ public class SaveData
     /// <summary>各关是否静音（索引 = 关卡索引），缺省 false（有声音）。</summary>
     public bool[] levelMuted;
 
+    /// <summary>各关历史最高星数（索引 = 关卡索引），未通关过为 0。</summary>
+    public int[] levelStars;
+
     /// <summary>创建新游戏存档。</summary>
     public static SaveData CreateNewGame()
     {
@@ -34,7 +36,7 @@ public class SaveData
             completedLevelIndices = Array.Empty<int>(),
             hasSave = true
         };
-        data.EnsureLevelAudioCapacity(GameConstants.LevelCount);
+        data.EnsureLevelSaveCapacity(GameConstants.LevelCount);
         return data;
     }
 
@@ -49,20 +51,61 @@ public class SaveData
         };
     }
 
-    /// <summary>确保每关音量数组长度与关卡数一致，旧存档缺项补默认值。</summary>
-    public void EnsureLevelAudioCapacity(int levelCount)
+    /// <summary>确保每关存档数组长度与关卡数一致，旧存档缺项补默认值。</summary>
+    public void EnsureLevelSaveCapacity(int levelCount)
     {
         if (levelCount <= 0)
         {
             levelBgmVolumes = Array.Empty<float>();
             levelSfxVolumes = Array.Empty<float>();
             levelMuted = Array.Empty<bool>();
+            levelStars = Array.Empty<int>();
             return;
         }
 
         levelBgmVolumes = EnsureVolumeArray(levelBgmVolumes, levelCount);
         levelSfxVolumes = EnsureVolumeArray(levelSfxVolumes, levelCount);
         levelMuted = EnsureMuteArray(levelMuted, levelCount);
+        levelStars = EnsureStarArray(levelStars, levelCount);
+    }
+
+    /// <summary>兼容旧调用。</summary>
+    public void EnsureLevelAudioCapacity(int levelCount)
+    {
+        EnsureLevelSaveCapacity(levelCount);
+    }
+
+    private static int[] EnsureStarArray(int[] existing, int levelCount)
+    {
+        int[] result = new int[levelCount];
+        for (int i = 0; i < levelCount; i++)
+        {
+            if (existing != null && i < existing.Length)
+            {
+                result[i] = ClampStarCount(existing[i]);
+            }
+            else
+            {
+                result[i] = 0;
+            }
+        }
+
+        return result;
+    }
+
+    private static int ClampStarCount(int value)
+    {
+        if (value < 0)
+        {
+            return 0;
+        }
+
+        if (value > LevelStarTracker.MaxStars)
+        {
+            return LevelStarTracker.MaxStars;
+        }
+
+        return value;
     }
 
     private static bool[] EnsureMuteArray(bool[] existing, int levelCount)
