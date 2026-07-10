@@ -39,6 +39,19 @@ public class OutcomePanelController : MonoBehaviour
         transitionUI = GetComponent<SceneTransitionUI>();
     }
 
+    private void Update()
+    {
+        if (!IsShowingDefeat)
+        {
+            return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            OnDefeatRestartClicked();
+        }
+    }
+
     public IEnumerator ShowVictoryAndWait(int levelIndex)
     {
         OutcomePanelView panel = ResolvePanel(GetVictoryPanelName(levelIndex));
