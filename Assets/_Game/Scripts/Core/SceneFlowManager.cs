@@ -210,6 +210,8 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
     private IEnumerator LoadSceneRoutine(SceneLoadRequest request)
     {
         isLoading = true;
+        LevelCountdownController.EnsureInstance();
+        LevelCountdownController.Instance?.Stop();
         EnsureTransitionUI();
         EnsureNarrativeIntro();
         EnsureOutcomePanels();
@@ -354,6 +356,23 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         {
             topBar.RefreshStars(LevelStarTracker.Instance.CurrentStars);
         }
+
+        StartLevelCountdown();
+    }
+
+    private void StartLevelCountdown()
+    {
+        LevelCountdownController.EnsureInstance();
+
+        if (CurrentLevelIndex < 0 || topBar == null || levelDatabase == null)
+        {
+            LevelCountdownController.Instance?.Stop();
+            topBar?.ConfigureCountdown(false);
+            return;
+        }
+
+        LevelEntry entry = levelDatabase.GetLevel(CurrentLevelIndex);
+        LevelCountdownController.Instance.StartForLevel(entry, topBar);
     }
 
     /// <summary>关卡场景显示 TopBar，主界面与其它非关卡场景隐藏。</summary>

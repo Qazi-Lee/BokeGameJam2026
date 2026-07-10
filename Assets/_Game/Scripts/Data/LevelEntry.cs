@@ -19,6 +19,10 @@ public class LevelEntry
     [Tooltip("过关转场时展示的角色图")]
     public Sprite characterSprite;
 
+    [Tooltip("关卡倒计时（秒）。<= 0 表示不限时，隐藏进度条。")]
+    [Min(0f)]
+    public float timeLimitSeconds;
+
     /// <summary>配置是否包含有效场景名。</summary>
     public bool IsValid => !string.IsNullOrWhiteSpace(sceneName);
 }

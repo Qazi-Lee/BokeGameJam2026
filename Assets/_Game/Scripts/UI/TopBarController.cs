@@ -27,6 +27,9 @@ public class TopBarController : MonoBehaviour
     [SerializeField] private Sprite filledStarSprite;
     [SerializeField] private Sprite emptyStarSprite;
 
+    [Header("倒计时")]
+    [SerializeField] private Slider countdownSlider;
+
     public bool IsVisible => gameObject.activeSelf;
 
     private void Awake()
@@ -150,6 +153,76 @@ public class TopBarController : MonoBehaviour
         }
 
         ResolveStarReferences();
+        ResolveCountdownReferences();
+    }
+
+    private void ResolveCountdownReferences()
+    {
+        if (countdownSlider == null)
+        {
+            Transform progressTransform = transform.Find("Progressbar");
+            if (progressTransform != null)
+            {
+                countdownSlider = progressTransform.GetComponent<Slider>();
+            }
+        }
+    }
+
+    /// <summary>配置倒计时进度条；max = 关卡初始秒数，value 从满递减到 0。</summary>
+    public void ConfigureCountdown(bool enabled, float totalSeconds = 0f)
+    {
+        ResolveCountdownReferences();
+
+        if (countdownSlider == null)
+        {
+            return;
+        }
+
+        countdownSlider.gameObject.SetActive(enabled);
+        if (!enabled || totalSeconds <= 0f)
+        {
+            return;
+        }
+
+        countdownSlider.minValue = 0f;
+        countdownSlider.maxValue = totalSeconds;
+        countdownSlider.wholeNumbers = false;
+        countdownSlider.interactable = false;
+        ApplyCountdownFillLayout();
+        SetCountdownRemaining(totalSeconds);
+    }
+
+    /// <summary>Fill 仅水平缩短：关闭 Preserve Aspect，高度铺满 Fill Area。</summary>
+    private void ApplyCountdownFillLayout()
+    {
+        if (countdownSlider == null || countdownSlider.fillRect == null)
+        {
+            return;
+        }
+
+        RectTransform fillRect = countdownSlider.fillRect;
+        fillRect.anchorMin = new Vector2(0f, 0f);
+        fillRect.anchorMax = new Vector2(1f, 1f);
+        fillRect.pivot = new Vector2(0f, 0.5f);
+        fillRect.anchoredPosition = Vector2.zero;
+        fillRect.sizeDelta = Vector2.zero;
+
+        Image fillImage = fillRect.GetComponent<Image>();
+        if (fillImage != null)
+        {
+            fillImage.preserveAspect = false;
+        }
+    }
+
+    /// <summary>更新剩余秒数（从 max 递减到 0，进度条逐渐变短）。</summary>
+    public void SetCountdownRemaining(float remainingSeconds)
+    {
+        if (countdownSlider == null || !countdownSlider.gameObject.activeSelf)
+        {
+            return;
+        }
+
+        countdownSlider.value = Mathf.Clamp(remainingSeconds, countdownSlider.minValue, countdownSlider.maxValue);
     }
 
     private void ResolveStarReferences()
