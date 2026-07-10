@@ -69,6 +69,7 @@ public class OutcomePanelController : MonoBehaviour
         {
             Debug.LogWarning(
                 $"[OutcomePanelController] 关卡 {levelIndex} 无胜利面板，将直接继续。");
+            PersistClearedLevelStars();
             SceneFlowManager.Instance?.LoadNextLevel();
             yield break;
         }
@@ -186,7 +187,29 @@ public class OutcomePanelController : MonoBehaviour
             return;
         }
 
+        PersistClearedLevelStars();
         SceneFlowManager.Instance.LoadNextLevel();
+    }
+
+    private void PersistClearedLevelStars()
+    {
+        if (SaveManager.Instance == null || SceneFlowManager.Instance == null)
+        {
+            return;
+        }
+
+        int levelIndex = SceneFlowManager.Instance.CurrentLevelIndex;
+        if (levelIndex < 0)
+        {
+            return;
+        }
+
+        LevelStarTracker.EnsureInstance();
+        int stars = LevelStarTracker.Instance != null
+            ? LevelStarTracker.Instance.CurrentStars
+            : LevelStarTracker.MaxStars;
+
+        SaveManager.Instance.SettleLevelStars(levelIndex, stars);
     }
 
     private void OnDefeatRestartClicked()

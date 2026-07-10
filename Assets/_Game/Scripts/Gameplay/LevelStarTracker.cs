@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// 当前关卡局内星级（3 星起，碰障碍/超时各最多扣 1 星）。每关加载时重置，通关后再写入存档。
+/// 当前关卡局内星级（3 星起，碰障碍/超时各最多扣 1 星）。每关加载时重置，胜利面板点击继续后写入存档。
 /// </summary>
 public class LevelStarTracker : BaseMonoManager<LevelStarTracker>
 {

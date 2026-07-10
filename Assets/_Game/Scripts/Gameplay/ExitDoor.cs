@@ -58,11 +58,6 @@ public class ExitDoor : MonoBehaviour
 
         if (SaveManager.Instance != null)
         {
-            LevelStarTracker.EnsureInstance();
-            int currentStars = LevelStarTracker.Instance != null
-                ? LevelStarTracker.Instance.CurrentStars
-                : LevelStarTracker.MaxStars;
-            SaveManager.Instance.SettleLevelStars(levelIndex, currentStars);
             SaveManager.Instance.OnLevelCleared(levelIndex);
         }
 
