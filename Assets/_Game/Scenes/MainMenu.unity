@@ -444,10 +444,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1030750971035205075, guid: e3e0b68398ccce74f8983fb71f272b90, type: 3}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: 21300000, guid: c9f84f0b5e7df1d47a719d39402a2fad, type: 3}
     - target: {fileID: 1845244113855110448, guid: e3e0b68398ccce74f8983fb71f272b90, type: 3}
       propertyPath: m_Name
       value: MainMenu
@@ -482,18 +478,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3383967144578010183, guid: e3e0b68398ccce74f8983fb71f272b90, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3383967144578010183, guid: e3e0b68398ccce74f8983fb71f272b90, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3383967144578010183, guid: e3e0b68398ccce74f8983fb71f272b90, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3383967144578010183, guid: e3e0b68398ccce74f8983fb71f272b90, type: 3}
-      propertyPath: m_LocalScale.z
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3383967144578010183, guid: e3e0b68398ccce74f8983fb71f272b90, type: 3}
@@ -583,8 +567,6 @@ MonoBehaviour:
   transitionUI: {fileID: 0}
   narrativeIntro: {fileID: 0}
   outcomePanels: {fileID: 0}
-  topBarPrefab: {fileID: 0}
-  topBarCanvasSortOrder: 40
 --- !u!4 &1587238563
 Transform:
   m_ObjectHideFlags: 0
