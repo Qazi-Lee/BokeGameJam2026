@@ -68,6 +68,18 @@ public class PlayerBody : MonoBehaviour
         body.AddForce(desiredTangent * (Mathf.Abs(horizontalInput) * force), ForceMode2D.Force);
     }
 
+    public void AddForce(Vector2 force, ForceMode2D forceMode = ForceMode2D.Force)
+    {
+        EnsureInitialized();
+
+        if (body == null || isFixed)
+        {
+            return;
+        }
+
+        body.AddForce(force, forceMode);
+    }
+
     public void SnapToPosition(Vector2 position)
     {
         EnsureInitialized();

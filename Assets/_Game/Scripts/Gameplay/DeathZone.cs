@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Collider2D))]
 public class DeathZone : MonoBehaviour
@@ -31,7 +32,9 @@ public class DeathZone : MonoBehaviour
             Debug.LogWarning("[DeathZone] GameStateManager not found in scene.");
             return;
         }
-
+    //暂时用同步加载场景
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        return;
         GameStateManager.Instance.EnterGameOver();
     }
 }

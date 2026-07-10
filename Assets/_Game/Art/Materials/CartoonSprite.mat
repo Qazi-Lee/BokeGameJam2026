@@ -54,7 +54,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _EnableExternalAlpha: 0
-    - _Intensity: 0.21
+    - _Intensity: 0.1
     - _NoiseScale: 1
     - _Strength: 0.0114
     - _TimeScale: 3
