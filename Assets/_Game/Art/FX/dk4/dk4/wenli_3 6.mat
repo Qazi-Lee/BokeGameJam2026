@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: lizi_3
-  m_Shader: {fileID: 4800000, guid: 4286cd55c80659547a303f15e583d256, type: 3}
+  m_Name: wenli_3 6
+  m_Shader: {fileID: 4800000, guid: 9844bafb1b37eaa4a8a9bb16e45e9d1d, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -24,10 +24,6 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _AlphaTex:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _DissolveTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -37,14 +33,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: c42c2dc4a4c7d0d439b0ee9ba3dacf20, type: 3}
+        m_Texture: {fileID: 2800000, guid: 660606ab6e3c8144481ab750c520edcf, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MaskTex:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _NormalMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -61,24 +53,20 @@ Material:
     - _DistortAffectMaskDissolve: 0
     - _DistortIntensity: 0.05
     - _DistortOn: 0
-    - _DstBlend: 1
-    - _EnableExternalAlpha: 0
+    - _DstBlend: 10
     - _MaskChannel: 3
     - _MaskInvert: 0
     - _MaskOn: 0
     - _Opacity: 1
-    - _SrcBlend: 1
+    - _SrcBlend: 5
     - _UseVertexColor: 1
     - _ZTest: 4
     - _ZWrite: 0
     m_Colors:
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _DissolveEdgeColor: {r: 1, g: 0.6, b: 0.1, a: 1}
     - _DissolvePanner: {r: 0, g: 0, b: 0, a: 0}
     - _DistortPanner: {r: 0, g: 0, b: 0, a: 0}
-    - _Flip: {r: 1, g: 1, b: 1, a: 1}
-    - _MainColor: {r: 4, g: 4, b: 4, a: 1}
+    - _MainColor: {r: 1, g: 1, b: 1, a: 1}
     - _MainPanner: {r: 0, g: 0, b: 0, a: 0}
     - _MaskPanner: {r: 0, g: 0, b: 0, a: 0}
-    - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
