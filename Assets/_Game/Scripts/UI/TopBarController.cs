@@ -199,12 +199,12 @@ public class TopBarController : MonoBehaviour
         {
             return;
         }
-        
+
         RectTransform fillArea = countdownSlider.fillRect.parent as RectTransform;
         if (fillArea != null)
         {
             // Left = 3, Right = 3
-            fillArea.offsetMin = new Vector2(3f, fillArea.offsetMin.y);
+            fillArea.offsetMin = new Vector2(5f, fillArea.offsetMin.y);
             fillArea.offsetMax = new Vector2(-3f, fillArea.offsetMax.y);
         }
 

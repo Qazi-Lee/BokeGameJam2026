@@ -53,6 +53,7 @@ public class SceneTransitionUI : MonoBehaviour
     public IEnumerator PlaySimpleFadeIn()
     {
         EnsureUiBuilt();
+        PrepareVisibleState();
 
         yield return AnimateAlpha(overlayGroup, 0f, fadeInDuration);
 

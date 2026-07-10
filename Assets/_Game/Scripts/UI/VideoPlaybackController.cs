@@ -66,15 +66,15 @@ public class VideoPlaybackController : MonoBehaviour
 
     public IEnumerator PlayEndingAndWait()
     {
-        yield return PlayVideoAndWait(endingVideo, "结尾");
+        yield return PlayVideoAndWait(endingVideo, "结尾", holdBlackBeforeHide: true);
     }
 
     public IEnumerator PlayCreditsAndWait()
     {
-        yield return PlayVideoAndWait(creditsVideo, "致谢");
+        yield return PlayVideoAndWait(creditsVideo, "致谢", holdBlackBeforeHide: false);
     }
 
-    private IEnumerator PlayVideoAndWait(VideoClip clip, string label)
+    private IEnumerator PlayVideoAndWait(VideoClip clip, string label, bool holdBlackBeforeHide)
     {
         if (clip == null)
         {
@@ -118,6 +118,13 @@ public class VideoPlaybackController : MonoBehaviour
 
         videoPlayer.loopPointReached -= OnVideoFinished;
         videoPlayer.Stop();
+        if (holdBlackBeforeHide)
+        {
+            transitionUI?.HoldBlack();
+            yield return null;
+            yield return new WaitForEndOfFrame();
+        }
+
         HideImmediate();
         isPlaying = false;
     }
@@ -164,6 +171,11 @@ public class VideoPlaybackController : MonoBehaviour
 
     private void ShowOverlay()
     {
+        if (videoImage != null)
+        {
+            videoImage.color = Color.white;
+        }
+
         if (canvasRoot != null)
         {
             canvasRoot.SetActive(true);

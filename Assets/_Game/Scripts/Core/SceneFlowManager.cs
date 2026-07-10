@@ -213,6 +213,11 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
             yield return videoPlayback.PlayEndingAndWait();
         }
 
+        EnsureTransitionUI();
+        transitionUI?.HoldBlack();
+        yield return null;
+        yield return new WaitForEndOfFrame();
+
         StartLoad(new SceneLoadRequest
         {
             TargetSceneName = levelDatabase.MainMenuSceneName,
@@ -293,7 +298,7 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
             yield return PlayLevelIntroIfNeeded(request);
         }
 
-        yield return PlayTransitionIn();
+        yield return PlayTransitionInSafely();
         FinishLoad();
 
         Debug.Log($"[SceneFlowManager] 加载完成：{SceneManager.GetActiveScene().name}");
@@ -344,6 +349,16 @@ public class SceneFlowManager : BaseMonoManager<SceneFlowManager>
         }
 
         yield return transitionUI.PlaySimpleFadeIn();
+    }
+
+    /// <summary>保持黑幕并让新场景先渲染一帧，再淡入，避免切换时闪回旧场景。</summary>
+    private IEnumerator PlayTransitionInSafely()
+    {
+        EnsureTransitionUI();
+        transitionUI?.HoldBlack();
+        yield return null;
+        yield return new WaitForEndOfFrame();
+        yield return PlayTransitionIn();
     }
 
     private void PrepareGameStateForLoad()
