@@ -23,8 +23,6 @@ public class AudioDatabaseSO : ScriptableObject
     [SerializeField] private AudioClipSO countdown;
     [SerializeField] private AudioClipSO collision;
     [SerializeField] private AudioClipSO playerHit;
-    [SerializeField] private AudioClipSO fall;
-    [SerializeField] private AudioClipSO waterSplash;
     [SerializeField] private AudioClipSO storyTyping;
 
     public AudioClip ResolveClip(string audioName)
@@ -99,16 +97,6 @@ public class AudioDatabaseSO : ScriptableObject
         if (audioName == GameConstants.AudioNames.PlayerHit)
         {
             return playerHit;
-        }
-
-        if (audioName == GameConstants.AudioNames.Fall)
-        {
-            return fall;
-        }
-
-        if (audioName == GameConstants.AudioNames.WaterSplash)
-        {
-            return waterSplash;
         }
 
         if (audioName == GameConstants.AudioNames.StoryTyping)

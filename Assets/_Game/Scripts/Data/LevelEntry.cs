@@ -23,6 +23,9 @@ public class LevelEntry
     [Min(0f)]
     public float timeLimitSeconds;
 
+    [Tooltip("进入死区时播放的本关落地音效（AudioClipSO）")]
+    public AudioClipSO landingSfx;
+
     /// <summary>配置是否包含有效场景名。</summary>
     public bool IsValid => !string.IsNullOrWhiteSpace(sceneName);
 }

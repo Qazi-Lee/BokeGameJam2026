@@ -184,16 +184,33 @@ public class AudioManager : BaseMonoManager<AudioManager>
         PlaySfx(GameConstants.AudioNames.PlayerHit, volumeScale);
     }
 
-    /// <summary>掉落、坠落音效。</summary>
-    public void PlayFall(float volumeScale = 1f)
+    /// <summary>当前关卡死区落地音效（来自 LevelDatabase 每关 landingSfx）。</summary>
+    public void PlayLandingSfx(float volumeScale = 1f)
     {
-        PlaySfx(GameConstants.AudioNames.Fall, volumeScale);
-    }
+        if (levelDatabase == null)
+        {
+            return;
+        }
 
-    /// <summary>落水、入水音效。</summary>
-    public void PlayWaterSplash(float volumeScale = 1f)
-    {
-        PlaySfx(GameConstants.AudioNames.WaterSplash, volumeScale);
+        int levelIndex = currentVolumeLevelIndex;
+        if (levelIndex < 0 && SceneFlowManager.Instance != null)
+        {
+            levelIndex = SceneFlowManager.Instance.CurrentLevelIndex;
+        }
+
+        if (levelIndex < 0)
+        {
+            return;
+        }
+
+        LevelEntry entry = levelDatabase.GetLevel(levelIndex);
+        AudioClip clip = entry?.landingSfx?.GetClip();
+        if (clip == null)
+        {
+            return;
+        }
+
+        PlayOneShot(clip, volumeScale);
     }
 
     /// <summary>剧情对话逐字打印音效。</summary>

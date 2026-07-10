@@ -25,8 +25,6 @@ public static class GameConstants
         public const string Countdown = "CountdownSfx";
         public const string Collision = "CollisionSfx";
         public const string PlayerHit = "PlayerHitSfx";
-        public const string Fall = "FallSfx";
-        public const string WaterSplash = "WaterSplashSfx";
         public const string StoryTyping = "StoryTypingSfx";
 
         /// <summary>兼容旧名，请改用 <see cref="GameOverBGM"/>。</summary>

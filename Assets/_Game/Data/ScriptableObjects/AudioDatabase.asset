@@ -24,6 +24,4 @@ MonoBehaviour:
   countdown: {fileID: 11400000, guid: e1f2a3b4c5d6789012345678abcdef09, type: 2}
   collision: {fileID: 11400000, guid: e2f3a4b5c6d7890123456789abcdef0a, type: 2}
   playerHit: {fileID: 11400000, guid: f7072345678901abcdef012345678907, type: 2}
-  fall: {fileID: 11400000, guid: f7082345678901abcdef012345678908, type: 2}
-  waterSplash: {fileID: 11400000, guid: f7092345678901abcdef012345678909, type: 2}
   storyTyping: {fileID: 11400000, guid: f70a2345678901abcdef01234567890a, type: 2}
