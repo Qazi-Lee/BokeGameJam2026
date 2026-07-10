@@ -39,6 +39,7 @@ public class LevelAchievementView : MonoBehaviour
     public event Action<int> OnLevelEnterRequested;
 
     private bool isInitialized;
+    private bool nestedCanvasNormalized;
 
     /// <summary>打开面板并刷新关卡列表。</summary>
     public void Show(LevelDatabaseSO levelDatabase, SaveManager saveManager)
@@ -50,7 +51,6 @@ public class LevelAchievementView : MonoBehaviour
         {
             EnsurePanelCoversScreen();
             EnsurePanelCanvasOnTop();
-            EnsureNestedCanvasCompatibility();
             panelRoot.transform.SetAsLastSibling();
             panelRoot.SetActive(true);
         }
@@ -140,7 +140,7 @@ public class LevelAchievementView : MonoBehaviour
     /// </summary>
     private void EnsureNestedCanvasCompatibility()
     {
-        if (panelRoot == null || panelRoot.transform.parent == null)
+        if (nestedCanvasNormalized || panelRoot == null || panelRoot.transform.parent == null)
         {
             return;
         }
@@ -150,23 +150,8 @@ public class LevelAchievementView : MonoBehaviour
             return;
         }
 
-        Canvas ownCanvas = panelRoot.GetComponent<Canvas>();
-        if (ownCanvas != null)
-        {
-            Destroy(ownCanvas);
-        }
-
-        CanvasScaler ownScaler = panelRoot.GetComponent<CanvasScaler>();
-        if (ownScaler != null)
-        {
-            Destroy(ownScaler);
-        }
-
-        GraphicRaycaster ownRaycaster = panelRoot.GetComponent<GraphicRaycaster>();
-        if (ownRaycaster != null)
-        {
-            Destroy(ownRaycaster);
-        }
+        UiCanvasComponentUtility.RemoveCanvasStack(panelRoot);
+        nestedCanvasNormalized = true;
     }
 
     private void EnsurePanelCoversScreen()

@@ -321,29 +321,7 @@ public class OutcomePanelController : MonoBehaviour
     /// </summary>
     private static void NormalizePanelHierarchy(GameObject panelRoot)
     {
-        Canvas rootCanvas = panelRoot.GetComponent<Canvas>();
-        if (rootCanvas != null)
-        {
-            Object.Destroy(rootCanvas);
-        }
-
-        CanvasScaler rootScaler = panelRoot.GetComponent<CanvasScaler>();
-        if (rootScaler != null)
-        {
-            Object.Destroy(rootScaler);
-        }
-
-        GraphicRaycaster[] raycasters = panelRoot.GetComponentsInChildren<GraphicRaycaster>(true);
-        foreach (GraphicRaycaster raycaster in raycasters)
-        {
-            Object.Destroy(raycaster);
-        }
-
-        Canvas[] nestedCanvases = panelRoot.GetComponentsInChildren<Canvas>(true);
-        foreach (Canvas nestedCanvas in nestedCanvases)
-        {
-            Object.Destroy(nestedCanvas);
-        }
+        UiCanvasComponentUtility.RemoveCanvasStacksUnder(panelRoot.transform);
 
         Image[] images = panelRoot.GetComponentsInChildren<Image>(true);
         foreach (Image image in images)

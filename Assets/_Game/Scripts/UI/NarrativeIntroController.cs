@@ -338,23 +338,7 @@ public class NarrativeIntroController : MonoBehaviour
             return;
         }
 
-        Canvas maskCanvas = mask.GetComponent<Canvas>();
-        if (maskCanvas != null)
-        {
-            Object.Destroy(maskCanvas);
-        }
-
-        GraphicRaycaster maskRaycaster = mask.GetComponent<GraphicRaycaster>();
-        if (maskRaycaster != null)
-        {
-            Object.Destroy(maskRaycaster);
-        }
-
-        Image maskImage = mask.GetComponent<Image>();
-        if (maskImage != null)
-        {
-            maskImage.raycastTarget = false;
-        }
+        UiCanvasComponentUtility.DisableMaskRaycastBlocking(mask);
     }
 
     private void ConfigureCanvas(GameObject panelObject)

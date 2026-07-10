@@ -97,23 +97,7 @@ public class OutcomePanelView : MonoBehaviour
             return;
         }
 
-        GraphicRaycaster raycaster = mask.GetComponent<GraphicRaycaster>();
-        if (raycaster != null)
-        {
-            Object.Destroy(raycaster);
-        }
-
-        Canvas maskCanvas = mask.GetComponent<Canvas>();
-        if (maskCanvas != null)
-        {
-            Object.Destroy(maskCanvas);
-        }
-
-        Image image = mask.GetComponent<Image>();
-        if (image != null)
-        {
-            image.raycastTarget = false;
-        }
+        UiCanvasComponentUtility.DisableMaskRaycastBlocking(mask);
     }
 
     private static Transform FindChildRecursive(Transform parent, string childName)
